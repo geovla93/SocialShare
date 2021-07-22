@@ -4,8 +4,7 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/client";
 import { XIcon, ThumbUpIcon, ChatAltIcon } from "@heroicons/react/outline";
 import { ThumbUpIcon as ThumpUpSolidIcon } from "@heroicons/react/solid";
-import axios from "axios";
-import { mutate } from "swr";
+import { mutate, cache } from "swr";
 
 import Card from "../Shared/Card";
 import ProfilePic from "../Shared/ProfilePic";
@@ -13,6 +12,7 @@ import CommentInputField from "./CommentInputField";
 
 import calculateDate from "@/utils/calculateDate";
 import PostCommentsOverview from "./PostCommentsOverview";
+import { deletePost, likePost, submitComment } from "@/utils/post";
 
 const CardPost = ({ post }) => {
 	const [errorMessage, setErrorMessage] = useState(false);
@@ -34,35 +34,18 @@ const CardPost = ({ post }) => {
 		router.push(`/profile/${post.user.username}`);
 
 	const handleDeletePost = async () => {
-		try {
-			await axios.delete(`/api/posts/${post._id}`);
-			mutate("/api/posts");
-		} catch (error) {
-			setErrorMessage(error);
-		}
+		await deletePost(post._id, setErrorMessage);
+		mutate("/api/posts");
 	};
 
 	const handleLikePost = async () => {
-		try {
-			if (isLiked) {
-				await axios.patch(`/api/posts/${post._id}/unlike`);
-				mutate("/api/posts");
-			} else {
-				await axios.patch(`/api/posts/${post._id}/like`);
-				mutate("/api/posts");
-			}
-		} catch (error) {
-			setErrorMessage(error);
-		}
+		await likePost(post._id, isLiked, setErrorMessage);
+		mutate("/api/posts");
 	};
 
 	const handleSubmitComment = async (text) => {
-		try {
-			await axios.post(`/api/posts/${post._id}/comment`, { text });
-			mutate("/api/posts");
-		} catch (error) {
-			setErrorMessage(error);
-		}
+		await submitComment(post._id, text, setErrorMessage);
+		mutate("/api/posts");
 	};
 
 	return (
@@ -96,17 +79,15 @@ const CardPost = ({ post }) => {
 				</div>
 				<p className="text-gray-800 text-lg">{post.text}</p>
 				{post.picUrl && (
-					<div className="w-full h-72 relative overflow-hidden">
+					<div className="relative w-full h-full">
 						<Image
+							className="object-cover object-center"
 							src={post.picUrl}
 							alt={`Post photo from ${post.user.name}`}
 							width={500}
 							height={500}
 							layout="responsive"
-							objectFit="cover"
-							objectPosition="center"
 						/>
-						{/* <div className="bg-gray-400 w-full h-full" /> */}
 					</div>
 				)}
 				<div className="flex items-center justify-between">
@@ -158,7 +139,7 @@ const CardPost = ({ post }) => {
 					</div>
 				</div>
 				<div className="bg-gray-400 h-px" ref={commentRef} />
-				<PostCommentsOverview comments={post.comments} />
+				<PostCommentsOverview comments={post.comments} postId={post._id} />
 				<CommentInputField
 					ref={commentRef}
 					onAddComment={handleSubmitComment}

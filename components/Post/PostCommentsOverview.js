@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 
 import PostComment from "./PostComment";
 
-const PostCommentsOverview = ({ comments }) => {
+const PostCommentsOverview = ({ comments, postId }) => {
 	return (
 		<>
 			{comments.length > 3 && (
@@ -14,7 +14,13 @@ const PostCommentsOverview = ({ comments }) => {
 				{comments.length > 0 &&
 					comments.map(
 						(comment, index) =>
-							index < 3 && <PostComment key={comment._id} comment={comment} />
+							index < 3 && (
+								<PostComment
+									key={comment._id}
+									comment={comment}
+									postId={postId}
+								/>
+							)
 					)}
 			</div>
 		</>

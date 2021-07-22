@@ -5,6 +5,7 @@ import usePosts from "@/hooks/usePosts";
 
 const PostsOverview = () => {
 	const { posts, isLoading, isError } = usePosts();
+	console.log(posts);
 
 	if (isLoading)
 		return Array(8)

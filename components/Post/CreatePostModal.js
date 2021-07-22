@@ -12,6 +12,7 @@ import ProfilePic from "../Shared/ProfilePic";
 import Button from "../Shared/Button";
 import uploadPic from "@/utils/cloudinary";
 import Spinner from "../Shared/Spinner";
+import { submitPost } from "@/utils/post";
 
 const CreatePostModal = ({
 	isOpen,
@@ -66,13 +67,8 @@ const CreatePostModal = ({
 			return;
 		}
 
-		try {
-			await axios.post("/api/posts", { ...data, picUrl });
-			mutate("/api/posts");
-		} catch (error) {
-			setError(error);
-			console.error(error);
-		}
+		await submitPost(data, picUrl, setError);
+		mutate("/api/posts");
 
 		setMedia(null);
 		setMediaPreview(null);

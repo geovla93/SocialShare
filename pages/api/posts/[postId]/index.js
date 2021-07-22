@@ -61,7 +61,7 @@ export default async function handler(req, res) {
 				res.status(200).json(post);
 			} catch (error) {
 				console.log(error);
-				res.status(500).json("Post not delete due to some error");
+				res.status(500).json("Post not deleted due to some error");
 			}
 			break;
 		default:

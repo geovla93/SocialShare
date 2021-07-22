@@ -1,13 +1,21 @@
+import { useState } from "react";
 import { XIcon } from "@heroicons/react/outline";
 import { useSession } from "next-auth/client";
 import PropTypes from "prop-types";
+import { mutate } from "swr";
 
 import ProfilePic from "../Shared/ProfilePic";
 
-const PostComment = ({ comment }) => {
+import { deleteComment } from "@/utils/post";
+
+const PostComment = ({ comment, postId }) => {
+	const [errorMessage, setErrorMessage] = useState(null);
 	const [session] = useSession();
 
-	const handleDeleteComment = async () => {};
+	const handleDeleteComment = async () => {
+		await deleteComment(postId, comment._id, setErrorMessage);
+		mutate("/api/posts");
+	};
 
 	return (
 		<div className="flex items-center space-x-4">
