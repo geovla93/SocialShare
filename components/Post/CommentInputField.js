@@ -1,17 +1,27 @@
-import { useState, useRef } from "react";
+import { useState, forwardRef } from "react";
 import { useSession } from "next-auth/client";
 import { PencilAltIcon } from "@heroicons/react/outline";
 
 import ProfilePic from "@/components/Shared/ProfilePic";
 import Spinner from "../Shared/Spinner";
 
-const CommentInputField = () => {
+// eslint-disable-next-line react/display-name
+const CommentInputField = forwardRef(({ onAddComment }, ref) => {
 	const [text, setText] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [session] = useSession();
-	const inputRef = useRef();
 
 	const handleTextChange = (event) => setText(event.target.value);
+
+	const handleSubmit = async (event) => {
+		event.preventDefault();
+
+		setIsSubmitting(true);
+		await onAddComment(text);
+
+		setIsSubmitting(false);
+		setText("");
+	};
 
 	return (
 		<div className="flex space-x-4 items-center px-3">
@@ -20,7 +30,10 @@ const CommentInputField = () => {
 				imageSrc={session.user.profilePicUrl}
 				imageAlt={session.user.name}
 			/>
-			<div className="flex items-center flex-1 p-2 px-3 border rounded-full">
+			<form
+				onSubmit={handleSubmit}
+				className="flex items-center flex-1 p-2 px-3 border rounded-full"
+			>
 				<input
 					className="flex-1 outline-none text-gray-600 placeholder-gray-400"
 					type="text"
@@ -28,19 +41,17 @@ const CommentInputField = () => {
 					name="text"
 					value={text}
 					onChange={handleTextChange}
-					ref={inputRef}
+					autoComplete="off"
+					ref={ref}
 				/>
 				{isSubmitting ? (
 					<Spinner styles="text-blue-500" />
 				) : (
-					<PencilAltIcon
-						className="w-6 h-6 text-blue-500"
-						onClick={() => inputRef.current.focus()}
-					/>
+					<PencilAltIcon className="w-6 h-6 text-blue-500" />
 				)}
-			</div>
+			</form>
 		</div>
 	);
-};
+});
 
 export default CommentInputField;

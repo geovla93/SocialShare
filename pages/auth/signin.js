@@ -40,7 +40,7 @@ const SigninPage = () => {
 
 		const userData = { ...data };
 
-		const result = await loginUser(userData, setErrorMessage);
+		await loginUser(userData, setErrorMessage);
 		setFormLoading(false);
 		router.replace("/");
 	};

@@ -1,28 +1,73 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { useState, useRef } from "react";
 import { useSession } from "next-auth/client";
-import { XIcon } from "@heroicons/react/outline";
+import { XIcon, ThumbUpIcon, ChatAltIcon } from "@heroicons/react/outline";
+import { ThumbUpIcon as ThumpUpSolidIcon } from "@heroicons/react/solid";
+import axios from "axios";
+import { mutate } from "swr";
 
 import Card from "../Shared/Card";
 import ProfilePic from "../Shared/ProfilePic";
 import CommentInputField from "./CommentInputField";
 
 import calculateDate from "@/utils/calculateDate";
+import PostCommentsOverview from "./PostCommentsOverview";
 
 const CardPost = ({ post }) => {
+	const [errorMessage, setErrorMessage] = useState(false);
 	const [session] = useSession();
 	const router = useRouter();
+	const commentRef = useRef();
 
 	const postDate = calculateDate(post.createdAt);
+	const likeByUser =
+		post.likes.length > 0 &&
+		post.likes.find((like) => like.user === session.user._id);
+	const isLiked =
+		post.likes.length > 0 &&
+		post.likes.filter((like) => like.user === session.user._id).length > 0;
 
 	const handleProfilePrefetch = (username) =>
 		router.prefetch(`/profile/${username}`);
 	const handleProfileRedirect = () =>
 		router.push(`/profile/${post.user.username}`);
 
+	const handleDeletePost = async () => {
+		try {
+			await axios.delete(`/api/posts/${post._id}`);
+			mutate("/api/posts");
+		} catch (error) {
+			setErrorMessage(error);
+		}
+	};
+
+	const handleLikePost = async () => {
+		try {
+			if (isLiked) {
+				await axios.patch(`/api/posts/${post._id}/unlike`);
+				mutate("/api/posts");
+			} else {
+				await axios.patch(`/api/posts/${post._id}/like`);
+				mutate("/api/posts");
+			}
+		} catch (error) {
+			setErrorMessage(error);
+		}
+	};
+
+	const handleSubmitComment = async (text) => {
+		try {
+			await axios.post(`/api/posts/${post._id}/comment`, { text });
+			mutate("/api/posts");
+		} catch (error) {
+			setErrorMessage(error);
+		}
+	};
+
 	return (
 		<Card>
-			<div className="flex flex-col space-y-4">
+			<div className="flex flex-col space-y-2">
 				<div className="flex items-center space-x-4">
 					<ProfilePic
 						styles="w-10 h-10 cursor-pointer"
@@ -39,9 +84,15 @@ const CardPost = ({ post }) => {
 						</h3>
 						<p className="text-gray-400 italic font-light">{postDate}</p>
 					</div>
-					<span className="p-2 rounded-full hover:bg-gray-300 transition-colors duration-300 ease-in-out cursor-pointer">
-						<XIcon className="w-6 h-6" />
-					</span>
+					{session.user.role === "admin" ||
+						(session.user._id === post.user._id && (
+							<span
+								className="p-2 rounded-full hover:bg-gray-300 transition-colors duration-300 ease-in-out cursor-pointer"
+								onClick={handleDeletePost}
+							>
+								<XIcon className="w-6 h-6" />
+							</span>
+						))}
 				</div>
 				<p className="text-gray-800 text-lg">{post.text}</p>
 				{post.picUrl && (
@@ -58,15 +109,60 @@ const CardPost = ({ post }) => {
 						{/* <div className="bg-gray-400 w-full h-full" /> */}
 					</div>
 				)}
-				<div className="flex items-center space-x-4">
-					<p className="text-sm text-gray-700 hover:text-blue-400 transition-colors duration-300 ease-in-out cursor-pointer">
-						Like!
-					</p>
-					<p className="text-sm text-gray-700 hover:text-blue-400 transition-colors duration-300 ease-in-out cursor-pointer">
-						Comment
+				<div className="flex items-center justify-between">
+					<span className="text-gray-700 font-light flex items-center space-x-2">
+						<span className="p-1 rounded-full bg-blue-500">
+							<ThumpUpSolidIcon className="w-3 h-3 text-gray-50" />
+						</span>
+						<span>
+							{likeByUser
+								? post.likes.length === 1
+									? "You"
+									: `You and ${post.likes.length - 1} more`
+								: post.likes.length}
+						</span>
+						{/* {post.likes.length} {post.likes.length === 1 ? "like" : "likes"} */}
+					</span>
+					<p className="text-gray-700">
+						{post.comments.length}{" "}
+						{post.comments.length === 1 ? "comment" : "comments"}
 					</p>
 				</div>
-				<CommentInputField />
+				<div className="bg-gray-400 h-px" />
+				<div className="flex items-center space-x-4">
+					<div
+						className="flex-1 flex items-center justify-center space-x-2 py-1 rounded hover:bg-gray-700 cursor-pointer transition-colors duration-300 ease-in-out group"
+						onClick={handleLikePost}
+					>
+						<ThumbUpIcon
+							className={`w-6 h-6 ${
+								isLiked ? "text-blue-400" : "text-gray-700"
+							} group-hover:text-blue-400 transition-colors duration-300 ease-in-out`}
+						/>
+						<p
+							className={`text-lg ${
+								isLiked ? "text-blue-400" : "text-gray-700"
+							} group-hover:text-blue-400 transition-colors duration-300 ease-in-out`}
+						>
+							Like!
+						</p>
+					</div>
+					<div
+						className="flex-1 flex items-center justify-center space-x-2 py-1 rounded hover:bg-gray-700 cursor-pointer transition-colors duration-300 ease-in-out group"
+						onClick={() => commentRef.current.focus()}
+					>
+						<ChatAltIcon className="w-6 h-6 text-gray-700 group-hover:text-blue-400 transition-colors duration-300 ease-in-out" />
+						<p className="text-lg text-gray-700 group-hover:text-blue-400 transition-colors duration-300 ease-in-out">
+							Comment
+						</p>
+					</div>
+				</div>
+				<div className="bg-gray-400 h-px" ref={commentRef} />
+				<PostCommentsOverview comments={post.comments} />
+				<CommentInputField
+					ref={commentRef}
+					onAddComment={handleSubmitComment}
+				/>
 			</div>
 		</Card>
 	);

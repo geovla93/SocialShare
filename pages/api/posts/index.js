@@ -49,7 +49,7 @@ export default async function handler(req, res) {
 
 				res.status(201).json("Post created successfully");
 			} catch (error) {
-				res.status(400).json("Could not create post");
+				res.status(500).json("Could not create post");
 			}
 
 			break;
