@@ -16,8 +16,8 @@ const CreatePost = () => {
 	const mediaRef = useRef();
 
 	useEffect(() => {
-		router.prefetch(`/profile/${session.user.username}`);
-	}, [router, session.user.username]);
+		session && router.prefetch(`/profile/${session.user.username}`);
+	}, [router, session]);
 
 	const openModal = () => setIsOpen(true);
 	const closeModal = () => setIsOpen(false);

@@ -35,10 +35,6 @@ const SigninPage = () => {
 		if (isSubmitSuccessful) reset({ email: "", password: "" });
 	}, [isSubmitSuccessful, reset]);
 
-	useEffect(() => {
-		router.prefetch("/");
-	}, [router]);
-
 	const onSubmit = async (data) => {
 		setFormLoading(true);
 

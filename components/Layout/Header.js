@@ -11,8 +11,8 @@ const Header = () => {
 	const router = useRouter();
 
 	useEffect(() => {
-		router.prefetch(`/profile/${session.user.username}`);
-	}, [router, session.user.username]);
+		session && router.prefetch(`/profile/${session.user.username}`);
+	}, [router, session]);
 
 	const handleRedirect = () => router.push(`/profile/${session.user.username}`);
 

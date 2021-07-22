@@ -37,8 +37,6 @@ const CreatePostModal = ({
 
 	const text = useWatch({ control, name: "text" });
 
-	console.log({ media, mediaRef });
-
 	useEffect(() => {
 		if (isSubmitSuccessful) {
 			reset({ text: "", location: "" });
