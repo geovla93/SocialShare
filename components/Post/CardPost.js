@@ -3,12 +3,13 @@ import { useRouter } from "next/router";
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/client";
 import { XIcon, ThumbUpIcon, ChatAltIcon } from "@heroicons/react/outline";
-import { ThumbUpIcon as ThumpUpSolidIcon } from "@heroicons/react/solid";
 
 import Card from "../Shared/Card";
 import ProfilePic from "../Shared/ProfilePic";
 import CommentInputField from "./CommentInputField";
 import PostCommentsOverview from "./PostCommentsOverview";
+import PostModal from "./PostModal";
+import PostStatsBar from "./PostStatsBar";
 
 import calculateDate from "@/utils/calculateDate";
 import useDeletePost from "@/hooks/useDeletePost";
@@ -17,6 +18,7 @@ import useCreateComment from "@/hooks/useCreateComment";
 
 const CardPost = ({ post }) => {
 	const [errorMessage, setErrorMessage] = useState(false);
+	const [showModal, setShowModal] = useState(false);
 	const [session] = useSession();
 	const router = useRouter();
 	const deleteMutation = useDeletePost();
@@ -25,17 +27,13 @@ const CardPost = ({ post }) => {
 	const commentRef = useRef();
 
 	const postDate = calculateDate(post.createdAt);
-	const likeByUser =
-		post.likes.length > 0 &&
-		post.likes.find((like) => like.user === session.user._id);
 	const isLiked =
 		post.likes.length > 0 &&
-		post.likes.filter((like) => like.user === session.user._id).length > 0;
-
+		!!post.likes.find((like) => like.user === session.user._id);
 	const handleProfilePrefetch = (username) =>
 		router.prefetch(`/profile/${username}`);
-	const handleProfileRedirect = () =>
-		router.push(`/profile/${post.user.username}`);
+	const handleProfileRedirect = (username) =>
+		router.push(`/profile/${username}`);
 
 	const handleDeletePost = async () => {
 		try {
@@ -70,9 +68,9 @@ const CardPost = ({ post }) => {
 						imageSrc={post.user.profilePicUrl}
 						imageAlt={post.user.name}
 						click
-						handleClick={handleProfileRedirect}
+						handleClick={handleProfileRedirect.bind(null, post.user.username)}
 						hover
-						handleHover={handleProfilePrefetch}
+						handleHover={handleProfilePrefetch.bind(null, post.user.username)}
 					/>
 					<div className="flex-1">
 						<h3 className="text-blue-500 text-xl font-semibold">
@@ -92,7 +90,10 @@ const CardPost = ({ post }) => {
 				</div>
 				<p className="text-gray-800 text-lg">{post.text}</p>
 				{post.picUrl && (
-					<div className="relative w-full h-full">
+					<div
+						className="relative w-full h-full cursor-pointer"
+						onClick={() => setShowModal(true)}
+					>
 						<Image
 							className="object-cover object-center"
 							src={post.picUrl}
@@ -103,25 +104,19 @@ const CardPost = ({ post }) => {
 						/>
 					</div>
 				)}
-				<div className="flex items-center justify-between">
-					<span className="text-gray-700 font-light flex items-center space-x-2">
-						<span className="p-1 rounded-full bg-blue-500">
-							<ThumpUpSolidIcon className="w-3 h-3 text-gray-50" />
-						</span>
-						<span>
-							{likeByUser
-								? post.likes.length === 1
-									? "You"
-									: `You and ${post.likes.length - 1} more`
-								: post.likes.length}
-						</span>
-						{/* {post.likes.length} {post.likes.length === 1 ? "like" : "likes"} */}
-					</span>
-					<p className="text-gray-700">
-						{post.comments.length}{" "}
-						{post.comments.length === 1 ? "comment" : "comments"}
-					</p>
-				</div>
+				<PostModal
+					showModal={showModal}
+					setShowModal={setShowModal}
+					post={post}
+					isLiked={isLiked}
+					onAddComment={handleSubmitComment}
+					onLikePost={handleLikePost}
+				/>
+				<PostStatsBar
+					isLiked={isLiked}
+					likes={post.likes}
+					comments={post.comments}
+				/>
 				<div className="bg-gray-400 h-px" />
 				<div className="flex items-center space-x-4">
 					<div
@@ -151,8 +146,12 @@ const CardPost = ({ post }) => {
 						</p>
 					</div>
 				</div>
-				<div className="bg-gray-400 h-px" ref={commentRef} />
-				<PostCommentsOverview comments={post.comments} postId={post._id} />
+				<div className="bg-gray-400 h-px" />
+				<PostCommentsOverview
+					comments={post.comments}
+					postId={post._id}
+					setShowModal={setShowModal}
+				/>
 				<CommentInputField
 					ref={commentRef}
 					onAddComment={handleSubmitComment}

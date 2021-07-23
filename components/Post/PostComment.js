@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { XIcon } from "@heroicons/react/outline";
 import { useSession } from "next-auth/client";
@@ -10,7 +11,13 @@ import useDeleteComment from "@/hooks/useDeleteComment";
 const PostComment = ({ comment, postId }) => {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [session] = useSession();
+	const router = useRouter();
 	const { mutateAsync } = useDeleteComment();
+
+	const handleProfilePrefetch = (username) =>
+		router.prefetch(`/profile/${username}`);
+	const handleProfileRedirect = (username) =>
+		router.push(`/profile/${username}`);
 
 	const handleDeleteComment = async () => {
 		try {
@@ -23,9 +30,13 @@ const PostComment = ({ comment, postId }) => {
 	return (
 		<div className="flex items-center space-x-4">
 			<ProfilePic
-				styles="w-8 h-8 self-start"
+				styles="w-8 h-8 self-start cursor-pointer"
 				imageSrc={comment.user.profilePicUrl}
 				imageAlt={comment.user.name}
+				click
+				handleClick={handleProfileRedirect.bind(null, comment.user.username)}
+				hover
+				handleHover={handleProfilePrefetch.bind(null, comment.user.username)}
 			/>
 			<div className="relative flex flex-col border border-gray-200 rounded-2xl px-4 py-1 bg-gray-200">
 				<h3 className="font-medium text-blue-500 hover:underline cursor-pointer">
@@ -48,6 +59,7 @@ const PostComment = ({ comment, postId }) => {
 
 PostComment.propTypes = {
 	comment: PropTypes.object,
+	postId: PropTypes.string,
 };
 
 export default PostComment;

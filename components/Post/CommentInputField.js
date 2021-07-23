@@ -21,7 +21,7 @@ const CommentInputField = forwardRef(({ onAddComment }, ref) => {
 	return (
 		<div className="flex space-x-4 items-center px-3">
 			<ProfilePic
-				styles="w-8 h-8"
+				styles="w-8 h-8 cursor-pointer"
 				imageSrc={session.user.profilePicUrl}
 				imageAlt={session.user.name}
 			/>

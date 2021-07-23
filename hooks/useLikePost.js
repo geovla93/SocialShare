@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "react-query";
 import { useSession } from "next-auth/client";
+import { v4 as uuidv4 } from "uuid";
 
 import { likePost } from "@/utils/post";
 
@@ -27,7 +28,7 @@ const useLikePost = () => {
 				queryClient.setQueriesData("posts", (prevPosts) =>
 					prevPosts.map((post) => {
 						if (post._id !== postId) return post;
-						post.likes.push({ user: session.user._id });
+						post.likes.push({ _id: uuidv4(), user: session.user._id });
 						return post;
 					})
 				);

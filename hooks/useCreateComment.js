@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "react-query";
 import { useSession } from "next-auth/client";
+import { v4 as uuidv4 } from "uuid";
 
 import { submitComment } from "@/utils/post";
 
@@ -15,7 +16,11 @@ const useCreateComment = () => {
 			queryClient.setQueriesData("posts", (prevPosts) =>
 				prevPosts.map((post) => {
 					if (post._id !== postId) return post;
-					post.comments.unshift({ text, user: session.user });
+					post.comments.unshift({
+						_id: uuidv4(),
+						text,
+						user: session.user,
+					});
 					return post;
 				})
 			);
