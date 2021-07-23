@@ -3,12 +3,10 @@ import { useSession } from "next-auth/client";
 import { PencilAltIcon } from "@heroicons/react/outline";
 
 import ProfilePic from "@/components/Shared/ProfilePic";
-import Spinner from "../Shared/Spinner";
 
 // eslint-disable-next-line react/display-name
 const CommentInputField = forwardRef(({ onAddComment }, ref) => {
 	const [text, setText] = useState("");
-	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [session] = useSession();
 
 	const handleTextChange = (event) => setText(event.target.value);
@@ -16,10 +14,7 @@ const CommentInputField = forwardRef(({ onAddComment }, ref) => {
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 
-		setIsSubmitting(true);
 		await onAddComment(text);
-
-		setIsSubmitting(false);
 		setText("");
 	};
 
@@ -44,11 +39,12 @@ const CommentInputField = forwardRef(({ onAddComment }, ref) => {
 					autoComplete="off"
 					ref={ref}
 				/>
-				{isSubmitting ? (
+				<PencilAltIcon className="w-6 h-6 text-blue-500" />
+				{/* {isLoading ? (
 					<Spinner styles="text-blue-500" />
 				) : (
 					<PencilAltIcon className="w-6 h-6 text-blue-500" />
-				)}
+				)} */}
 			</form>
 		</div>
 	);

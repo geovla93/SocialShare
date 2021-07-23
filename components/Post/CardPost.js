@@ -4,20 +4,24 @@ import { useState, useRef } from "react";
 import { useSession } from "next-auth/client";
 import { XIcon, ThumbUpIcon, ChatAltIcon } from "@heroicons/react/outline";
 import { ThumbUpIcon as ThumpUpSolidIcon } from "@heroicons/react/solid";
-import { mutate, cache } from "swr";
 
 import Card from "../Shared/Card";
 import ProfilePic from "../Shared/ProfilePic";
 import CommentInputField from "./CommentInputField";
+import PostCommentsOverview from "./PostCommentsOverview";
 
 import calculateDate from "@/utils/calculateDate";
-import PostCommentsOverview from "./PostCommentsOverview";
-import { deletePost, likePost, submitComment } from "@/utils/post";
+import useDeletePost from "@/hooks/useDeletePost";
+import useLikePost from "@/hooks/useLikePost";
+import useCreateComment from "@/hooks/useCreateComment";
 
 const CardPost = ({ post }) => {
 	const [errorMessage, setErrorMessage] = useState(false);
 	const [session] = useSession();
 	const router = useRouter();
+	const deleteMutation = useDeletePost();
+	const likeMutation = useLikePost();
+	const commentMutation = useCreateComment();
 	const commentRef = useRef();
 
 	const postDate = calculateDate(post.createdAt);
@@ -34,18 +38,27 @@ const CardPost = ({ post }) => {
 		router.push(`/profile/${post.user.username}`);
 
 	const handleDeletePost = async () => {
-		await deletePost(post._id, setErrorMessage);
-		mutate("/api/posts");
+		try {
+			await deleteMutation.mutateAsync({ postId: post._id });
+		} catch (error) {
+			setErrorMessage(error);
+		}
 	};
 
 	const handleLikePost = async () => {
-		await likePost(post._id, isLiked, setErrorMessage);
-		mutate("/api/posts");
+		try {
+			await likeMutation.mutateAsync({ postId: post._id, isLiked });
+		} catch (error) {
+			setErrorMessage(error);
+		}
 	};
 
 	const handleSubmitComment = async (text) => {
-		await submitComment(post._id, text, setErrorMessage);
-		mutate("/api/posts");
+		try {
+			await commentMutation.mutateAsync({ postId: post._id, text });
+		} catch (error) {
+			setErrorMessage(error);
+		}
 	};
 
 	return (

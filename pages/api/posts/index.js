@@ -30,7 +30,7 @@ export default async function handler(req, res) {
 		case "POST":
 			const { text, location, picUrl } = req.body;
 			const userId = session.accessToken;
-			console.log(picUrl);
+			console.log(text, location, picUrl);
 
 			if (text.length < 1) {
 				res.status(400).json("Text must be at least 1 character");

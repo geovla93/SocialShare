@@ -1,12 +1,12 @@
-import useSWR from "swr";
-import { fetcher } from "@/utils/fetcher";
+import { useQuery } from "react-query";
+import { getPosts } from "@/utils/fetcher";
 
 const usePosts = () => {
-	const { data, error } = useSWR("/api/posts", fetcher);
+	const { data, error, isLoading } = useQuery("posts", getPosts);
 
 	return {
 		posts: data,
-		isLoading: !data && !error,
+		isLoading,
 		isError: error,
 	};
 };

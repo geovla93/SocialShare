@@ -5,12 +5,11 @@ import usePosts from "@/hooks/usePosts";
 
 const PostsOverview = () => {
 	const { posts, isLoading, isError } = usePosts();
-	console.log(posts);
 
 	if (isLoading)
 		return Array(8)
 			.fill()
-			.map((item, index) => <PostSkeleton key={index + Math.random()} />);
+			.map((_, index) => <PostSkeleton key={index + Math.random()} />);
 	if (isError) return <p>Something went wrong please refresh.</p>;
 
 	return (

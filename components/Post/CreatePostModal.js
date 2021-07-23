@@ -5,14 +5,13 @@ import { useSession } from "next-auth/client";
 import { Dialog, Transition } from "@headlessui/react";
 import { XIcon, PhotographIcon } from "@heroicons/react/outline";
 import { useForm, useWatch, Controller } from "react-hook-form";
-import axios from "axios";
-import { mutate } from "swr";
 
 import ProfilePic from "../Shared/ProfilePic";
 import Button from "../Shared/Button";
+
 import uploadPic from "@/utils/cloudinary";
 import Spinner from "../Shared/Spinner";
-import { submitPost } from "@/utils/post";
+import useCreatePost from "@/hooks/useCreatePost";
 
 const CreatePostModal = ({
 	isOpen,
@@ -24,10 +23,10 @@ const CreatePostModal = ({
 	handleImageChange,
 	mediaRef,
 }) => {
-	const [formLoading, setFormLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [session] = useSession();
 	const router = useRouter();
+	const { mutateAsync, isLoading } = useCreatePost();
 	const modalRef = useRef();
 	const {
 		control,
@@ -57,22 +56,24 @@ const CreatePostModal = ({
 	};
 
 	const onSubmit = async (data) => {
-		setFormLoading(true);
-
 		let picUrl;
 		if (media !== null) picUrl = await uploadPic(media);
 		if (media !== null && !picUrl) {
-			setLoading(false);
 			setError("Error Uploading Image");
 			return;
 		}
 
-		await submitPost(data, picUrl, setError);
-		mutate("/api/posts");
+		try {
+			await mutateAsync({
+				data,
+				picUrl,
+			});
+		} catch (error) {
+			setError(error);
+		}
 
 		setMedia(null);
 		setMediaPreview(null);
-		setFormLoading(false);
 	};
 
 	return (
@@ -191,13 +192,9 @@ const CreatePostModal = ({
 							<Button
 								styles="disabled:cursor-not-allowed"
 								type="submit"
-								disabled={text === "" || formLoading}
+								disabled={text === "" || isLoading}
 							>
-								{formLoading ? (
-									<Spinner styles="text-white mx-auto" />
-								) : (
-									"Submit"
-								)}
+								{isLoading ? <Spinner styles="text-white mx-auto" /> : "Submit"}
 							</Button>
 						</Dialog.Description>
 					</div>

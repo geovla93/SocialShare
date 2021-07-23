@@ -2,19 +2,22 @@ import { useState } from "react";
 import { XIcon } from "@heroicons/react/outline";
 import { useSession } from "next-auth/client";
 import PropTypes from "prop-types";
-import { mutate } from "swr";
 
 import ProfilePic from "../Shared/ProfilePic";
 
-import { deleteComment } from "@/utils/post";
+import useDeleteComment from "@/hooks/useDeleteComment";
 
 const PostComment = ({ comment, postId }) => {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [session] = useSession();
+	const { mutateAsync } = useDeleteComment();
 
 	const handleDeleteComment = async () => {
-		await deleteComment(postId, comment._id, setErrorMessage);
-		mutate("/api/posts");
+		try {
+			await mutateAsync({ postId, commentId: comment._id });
+		} catch (error) {
+			setErrorMessage(error);
+		}
 	};
 
 	return (
