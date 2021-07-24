@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
@@ -14,10 +15,11 @@ import axios from "axios";
 import FormInput from "@/components/Shared/FormInput";
 import Button from "@/components/Shared/Button";
 import ImageDropDiv from "@/components/Shared/ImageDropDiv";
-import Spinner from "@/components/Shared/Spinner";
 
 import uploadPic from "@/utils/cloudinary";
 import { registerUser } from "@/utils/user";
+
+const Spinner = dynamic(() => import("@/components/Shared/Spinner"));
 
 const SignupPage = () => {
 	const [usernameAvailable, setUsernameAvailable] = useState(false);

@@ -1,11 +1,13 @@
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/client";
 import { PhotographIcon } from "@heroicons/react/outline";
 
 import Card from "../Shared/Card";
-import CreatePostModal from "./CreatePostModal";
 import ProfilePic from "../Shared/ProfilePic";
+
+const CreatePostModal = dynamic(() => import("./CreatePostModal"));
 
 const CreatePost = () => {
 	const [isOpen, setIsOpen] = useState(false);

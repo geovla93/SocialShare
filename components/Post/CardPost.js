@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { useState, useRef } from "react";
 import { useSession } from "next-auth/client";
 import { XIcon, ThumbUpIcon, ChatAltIcon } from "@heroicons/react/outline";
@@ -8,13 +9,14 @@ import Card from "../Shared/Card";
 import ProfilePic from "../Shared/ProfilePic";
 import CommentInputField from "./CommentInputField";
 import PostCommentsOverview from "./PostCommentsOverview";
-import PostModal from "./PostModal";
 import PostStatsBar from "./PostStatsBar";
 
 import calculateDate from "@/utils/calculateDate";
 import useDeletePost from "@/hooks/useDeletePost";
 import useLikePost from "@/hooks/useLikePost";
 import useCreateComment from "@/hooks/useCreateComment";
+
+const PostModal = dynamic(() => import("./PostModal"));
 
 const CardPost = ({ post }) => {
 	const [errorMessage, setErrorMessage] = useState(false);

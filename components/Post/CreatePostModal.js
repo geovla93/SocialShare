@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useSession } from "next-auth/client";
@@ -10,8 +11,9 @@ import ProfilePic from "../Shared/ProfilePic";
 import Button from "../Shared/Button";
 
 import uploadPic from "@/utils/cloudinary";
-import Spinner from "../Shared/Spinner";
 import useCreatePost from "@/hooks/useCreatePost";
+
+const Spinner = dynamic(() => import("../Shared/Spinner"));
 
 const CreatePostModal = ({
 	isOpen,

@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { InboxIcon, EyeIcon } from "@heroicons/react/outline";
@@ -7,7 +8,8 @@ import FormInput from "@/components/Shared/FormInput";
 import Button from "@/components/Shared/Button";
 
 import { loginUser } from "@/utils/user";
-import Spinner from "@/components/Shared/Spinner";
+
+const Spinner = dynamic(() => import("@/components/Shared/Spinner"));
 
 const SigninPage = () => {
 	const [formLoading, setFormLoading] = useState(false);

@@ -1,10 +1,12 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useSession } from "next-auth/client";
 
-import ProfileDropdown from "./ProfileDropdown";
 import ProfilePic from "../Shared/ProfilePic";
+
+const ProfileDropdown = dynamic(() => import("./ProfileDropdown"));
 
 const Header = () => {
 	const [session] = useSession();
