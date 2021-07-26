@@ -1,11 +1,45 @@
 import axios from "axios";
+import { request, gql } from "graphql-request";
+
+const PostsQuery = gql`
+	query {
+		posts {
+			_id
+			user {
+				_id
+				name
+				email
+				username
+				bio
+				profilePicUrl
+				role
+			}
+			text
+			location
+			picUrl
+			likes {
+				user
+			}
+			comments {
+				_id
+				user {
+					_id
+					name
+					email
+					username
+					bio
+					profilePicUrl
+					role
+				}
+				text
+				date
+			}
+			createdAt
+		}
+	}
+`;
 
 export const getPosts = async () => {
-	const res = await axios.get("/api/posts");
-	return res.data;
-};
-
-export const getPostComments = async (postId) => {
-	const res = await axios.get(`/api/posts/${postId}/comments`);
-	return res.data;
+	const { posts } = await request("/api/graphql", PostsQuery);
+	return posts;
 };

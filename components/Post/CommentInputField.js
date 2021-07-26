@@ -11,10 +11,10 @@ const CommentInputField = forwardRef(({ onAddComment }, ref) => {
 
 	const handleTextChange = (event) => setText(event.target.value);
 
-	const handleSubmit = async (event) => {
+	const handleSubmit = (event) => {
 		event.preventDefault();
 
-		await onAddComment(text);
+		onAddComment(text);
 		setText("");
 	};
 
@@ -40,11 +40,6 @@ const CommentInputField = forwardRef(({ onAddComment }, ref) => {
 					ref={ref}
 				/>
 				<PencilAltIcon className="w-6 h-6 text-blue-500" />
-				{/* {isLoading ? (
-					<Spinner styles="text-blue-500" />
-				) : (
-					<PencilAltIcon className="w-6 h-6 text-blue-500" />
-				)} */}
 			</form>
 		</div>
 	);

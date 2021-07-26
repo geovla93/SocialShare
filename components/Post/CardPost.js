@@ -75,7 +75,14 @@ const CardPost = ({ post }) => {
 						handleHover={handleProfilePrefetch.bind(null, post.user.username)}
 					/>
 					<div className="flex-1">
-						<h3 className="text-blue-500 text-xl font-semibold">
+						<h3
+							className="text-blue-500 text-xl font-semibold cursor-pointer"
+							onClick={handleProfileRedirect.bind(null, post.user.username)}
+							onMouseEnter={handleProfilePrefetch.bind(
+								null,
+								post.user.username
+							)}
+						>
 							{post.user.name}
 						</h3>
 						<p className="text-gray-400 italic font-light">{postDate}</p>
