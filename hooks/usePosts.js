@@ -1,8 +1,11 @@
-import { useQuery } from "react-query";
+import { useQuery, useInfiniteQuery } from "react-query";
 import { getPosts } from "@/utils/fetcher";
 
 const usePosts = () => {
-	return useQuery("posts", getPosts);
+	return useInfiniteQuery("posts", ({ pageParam = 1 }) => getPosts(pageParam), {
+		getNextPageParam: (lastPage) => lastPage.nextId ?? undefined,
+		keepPreviousData: true,
+	});
 };
 
 export default usePosts;

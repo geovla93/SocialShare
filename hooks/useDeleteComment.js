@@ -9,18 +9,20 @@ const useDeleteComment = () => {
 		onMutate: async ({ postId, commentId }) => {
 			await queryClient.cancelQueries("posts");
 			const oldPosts = queryClient.getQueryData("posts");
-
-			queryClient.setQueriesData("posts", (prevPosts) =>
-				prevPosts.map((post) => {
-					if (post._id !== postId) return post;
-					const commentIndex = post.comments.findIndex(
-						(comment) => comment._id === commentId
-					);
-					post.comments.splice(commentIndex, 1);
-					return post;
-				})
-			);
-
+			queryClient.setQueryData("posts", (data) => ({
+				pages: data.pages.map((page) => ({
+					posts: page.posts.map((post) => {
+						if (post._id !== postId) return post;
+						const commentIndex = post.comments.findIndex(
+							(comment) => comment._id === commentId
+						);
+						post.comments.splice(commentIndex, 1);
+						return post;
+					}),
+					nextId: page.nextId,
+				})),
+				pageParams: data.pageParams,
+			}));
 			return { oldPosts };
 		},
 		onError: (err, { postId, isLiked }, context) => {

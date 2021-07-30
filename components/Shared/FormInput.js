@@ -7,8 +7,8 @@ const FormInput = ({ name, control, rules, Icon, ...otherProps }) => {
 	} = useController({ name, control, rules, defaultValue: "" });
 
 	return (
-		<div className="realtive">
-			<div className="flex-1 flex items-center space-x-4 border rounded p-2">
+		<div className="relative flex-1">
+			<div className="flex items-center space-x-4 border rounded p-2">
 				{Icon && Icon}
 				<input
 					className="flex-1 outline-none bg-white placeholder-gray-400"

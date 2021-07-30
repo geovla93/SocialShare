@@ -14,24 +14,32 @@ const useLikePost = () => {
 			const oldPosts = queryClient.getQueryData("posts");
 
 			if (isLiked) {
-				queryClient.setQueriesData("posts", (prevPosts) =>
-					prevPosts.map((post) => {
-						if (post._id !== postId) return post;
-						const likeIndex = post.likes.findIndex(
-							(like) => like.user === session.user._id
-						);
-						post.likes.splice(likeIndex, 1);
-						return post;
-					})
-				);
+				queryClient.setQueryData("posts", (data) => ({
+					pages: data.pages.map((page) => ({
+						posts: page.posts.map((post) => {
+							if (post._id !== postId) return post;
+							const likeIndex = post.likes.findIndex(
+								(like) => like.user === session.user._id
+							);
+							post.likes.splice(likeIndex, 1);
+							return post;
+						}),
+						nextId: page.nextId,
+					})),
+					pageParams: data.pageParams,
+				}));
 			} else {
-				queryClient.setQueriesData("posts", (prevPosts) =>
-					prevPosts.map((post) => {
-						if (post._id !== postId) return post;
-						post.likes.push({ _id: uuidv4(), user: session.user._id });
-						return post;
-					})
-				);
+				queryClient.setQueryData("posts", (data) => ({
+					pages: data.pages.map((page) => ({
+						posts: page.posts.map((post) => {
+							if (post._id !== postId) return post;
+							post.likes.push({ _id: uuidv4(), user: session.user._id });
+							return post;
+						}),
+						nextId: page.nextId,
+					})),
+					pageParams: data.pageParams,
+				}));
 			}
 
 			return { oldPosts };

@@ -1,18 +1,48 @@
-import axios from "axios";
 import { signIn } from "next-auth/client";
+import { request, gql } from "graphql-request";
+import { toast } from "react-toastify";
 
-export const registerUser = async (user, profilePicUrl, setErrorMessage) => {
+const SignUpMutation = gql`
+	mutation SignUpMutation(
+		$name: String!
+		$email: String!
+		$password: String!
+		$username: String!
+		$bio: String!
+		$profilePicUrl: String
+	) {
+		signUp(
+			user: {
+				name: $name
+				email: $email
+				password: $password
+				username: $username
+				bio: $bio
+			}
+			profilePicUrl: $profilePicUrl
+		) {
+			_id
+			name
+			email
+			createdAt
+		}
+	}
+`;
+
+export const registerUser = async (user, profilePicUrl) => {
 	try {
-		const res = await axios.post("/api/auth/signup", { user, profilePicUrl });
+		const response = await request("/api/graphql", SignUpMutation, {
+			...user,
+			profilePicUrl,
+		});
 
-		const result = res.statusText;
-		if (result !== "OK") setErrorMessage(res.data);
+		return response;
 	} catch (error) {
-		setErrorMessage(error);
+		return JSON.parse(JSON.stringify(error, null, 2));
 	}
 };
 
-export const loginUser = async (user, setErrorMessage) => {
+export const loginUser = async (user) => {
 	try {
 		const res = await signIn("credentials", {
 			redirect: false,
@@ -22,7 +52,6 @@ export const loginUser = async (user, setErrorMessage) => {
 
 		return res;
 	} catch (error) {
-		setErrorMessage(error);
-		return;
+		return error;
 	}
 };

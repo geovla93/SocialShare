@@ -3,10 +3,12 @@ import NextNProgress from "nextjs-progressbar";
 import { Provider } from "next-auth/client";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Hydrate } from "react-query/hydration";
+import { ReactQueryDevtools } from "react-query/devtools";
 
 import Layout from "@/components/Layout/Layout";
 
 import "../styles/globals.css";
+import "react-toastify/dist/ReactToastify.css";
 
 function MyApp({ Component, pageProps }) {
 	const [queryClient] = useState(() => new QueryClient());
@@ -24,6 +26,7 @@ function MyApp({ Component, pageProps }) {
 					<Layout {...pageProps}>
 						<Component {...pageProps} />
 					</Layout>
+					<ReactQueryDevtools initialIsOpen={false} />
 				</Hydrate>
 			</QueryClientProvider>
 		</Provider>

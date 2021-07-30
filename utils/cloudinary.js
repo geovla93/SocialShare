@@ -13,8 +13,6 @@ const uploadPic = async (media) => {
 			data: form,
 		});
 
-		console.log(res);
-
 		return res.data.url;
 	} catch (error) {
 		alert("Error uploading image", error);

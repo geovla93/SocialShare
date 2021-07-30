@@ -12,22 +12,24 @@ const useCreateComment = () => {
 		onMutate: async ({ postId, text }) => {
 			await queryClient.cancelQueries("posts");
 			const oldPosts = queryClient.getQueryData("posts");
-
-			queryClient.setQueriesData("posts", (prevPosts) =>
-				prevPosts.map((post) => {
-					if (post._id !== postId) return post;
-					post.comments.unshift({
-						_id: uuidv4(),
-						text,
-						user: session.user,
-					});
-					return post;
-				})
-			);
-
+			queryClient.setQueryData("posts", (data) => ({
+				pages: data.pages.map((page) => ({
+					posts: page.posts.map((post) => {
+						if (post._id !== postId) return post;
+						post.comments.unshift({
+							_id: uuidv4(),
+							text,
+							user: session.user,
+						});
+						return post;
+					}),
+					nextId: page.nextId,
+				})),
+				pageParams: data.pageParams,
+			}));
 			return { oldPosts };
 		},
-		onError: (err, { postId, isLiked }, context) => {
+		onError: (err, { postId, text }, context) => {
 			queryClient.setQueryData("posts", context.oldPosts);
 		},
 		onSettled: () => {

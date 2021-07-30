@@ -9,7 +9,8 @@ import {
 	XCircleIcon,
 	BookOpenIcon,
 } from "@heroicons/react/outline";
-import axios from "axios";
+import { request, gql } from "graphql-request";
+import { toast } from "react-toastify";
 
 import FormInput from "@/components/Shared/FormInput";
 import Button from "@/components/Shared/Button";
@@ -18,6 +19,12 @@ import Spinner from "@/components/Shared/Spinner";
 
 import uploadPic from "@/utils/cloudinary";
 import { registerUser } from "@/utils/user";
+
+const CheckUsernameQuery = gql`
+	query CheckUsernameQuery($username: String!) {
+		isUsernameAvailable(username: $username)
+	}
+`;
 
 const SignupPage = () => {
 	const [usernameAvailable, setUsernameAvailable] = useState(false);
@@ -58,21 +65,26 @@ const SignupPage = () => {
 		setUsernameLoading(true);
 
 		try {
-			const res = await axios(`/api/auth/signup/${username}`);
+			const { isUsernameAvailable } = await request(
+				"/api/graphql",
+				CheckUsernameQuery,
+				{
+					username,
+				}
+			);
 
-			if (errorMessage !== null) setErrorMessage(null);
-
-			if (res.data === "Available") {
+			if (isUsernameAvailable) {
 				setUsernameAvailable(true);
 			} else {
 				setUsernameAvailable(false);
 			}
 		} catch (error) {
-			setErrorMessage("Username Not Available");
+			toast.error("Username Not Available");
 			setUsernameAvailable(false);
 		}
+
 		setUsernameLoading(false);
-	}, [username, errorMessage]);
+	}, [username]);
 
 	useEffect(() => {
 		username === "" ? setUsernameAvailable(false) : checkUsername();
@@ -106,22 +118,23 @@ const SignupPage = () => {
 
 		if (media !== null && !profilePicUrl) {
 			setFormLoading(false);
-			setErrorMessage("Error uploading image");
+			toast.error("Error uploading image");
 			return;
 		}
 
-		try {
-			await registerUser(data, profilePicUrl, setErrorMessage);
-		} catch (error) {
-			setErrorMessage(error);
-		}
+		const { response } = await registerUser(data, profilePicUrl);
 
-		setFormLoading(false);
-		if (!errorMessage) router.push("/auth/signin");
+		if (response.errors) {
+			toast.error(response.errors[0].message);
+			setFormLoading(false);
+		} else {
+			router.push("/auth/signin");
+			setFormLoading(false);
+		}
 	};
 
 	return (
-		<div className="flex-1 flex items-center justify-center">
+		<div className="flex-1 flex items-center justify-center w-11/12 md:w-3/5 lg:w-1/2 max-w-screen-lg mx-auto">
 			<form
 				className="flex-1 flex flex-col space-y-6 p-3 bg-white border rounded shadow"
 				onSubmit={handleSubmit(onSubmit)}

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/client";
 
 import ProfilePic from "../Shared/ProfilePic";
+import SearchUsers from "./SearchUsers";
 
 const ProfileDropdown = dynamic(() => import("./ProfileDropdown"));
 
@@ -26,6 +27,7 @@ const Header = () => {
 						SocialShare
 					</a>
 				</Link>
+				{session && <SearchUsers />}
 				<div className="flex items-center space-x-4">
 					{session ? (
 						<>

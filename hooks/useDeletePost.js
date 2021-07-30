@@ -8,10 +8,13 @@ const useDeletePost = () => {
 		onMutate: async ({ postId }) => {
 			await queryClient.cancelQueries("posts");
 			const oldPosts = queryClient.getQueryData("posts");
-			queryClient.setQueryData("posts", (prevPosts) =>
-				prevPosts.filter((post) => post._id !== postId)
-			);
-
+			queryClient.setQueryData("posts", (data) => ({
+				pages: data.pages.map((page) => ({
+					posts: page.posts.filter((post) => post._id !== postId),
+					nextId: page.nextId,
+				})),
+				pageParams: data.pageParams,
+			}));
 			return { oldPosts };
 		},
 		onError: (err, variables, context) => {

@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { InboxIcon, EyeIcon } from "@heroicons/react/outline";
+import { toast } from "react-toastify";
 
 import FormInput from "@/components/Shared/FormInput";
 import Button from "@/components/Shared/Button";
@@ -13,7 +14,6 @@ const SigninPage = () => {
 	const [formLoading, setFormLoading] = useState(false);
 	const [submitDisabled, setSubmitDisabled] = useState(true);
 	const [showPassword, setShowPassword] = useState(false);
-	const [errorMessage, setErrorMessage] = useState(null);
 	const router = useRouter();
 
 	const {
@@ -40,13 +40,20 @@ const SigninPage = () => {
 
 		const userData = { ...data };
 
-		await loginUser(userData, setErrorMessage);
-		setFormLoading(false);
-		router.replace("/");
+		const result = await loginUser(userData);
+
+		if (result.error) {
+			toast.error(result.error);
+			setFormLoading(false);
+			return;
+		} else {
+			setFormLoading(false);
+			router.replace("/");
+		}
 	};
 
 	return (
-		<div className="flex-1 flex items-center justify-center">
+		<div className="flex-1 flex items-center justify-center w-11/12 md:w-3/5 lg:w-1/2 max-w-screen-lg mx-auto">
 			<form
 				className="flex-1 flex flex-col space-y-6 p-3 bg-white border rounded shadow"
 				onSubmit={handleSubmit(onSubmit)}

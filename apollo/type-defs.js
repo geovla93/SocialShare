@@ -2,7 +2,9 @@ import gql from "graphql-tag";
 
 export const typeDefs = gql`
 	type Query {
-		posts: [Post!]
+		posts(pageNumber: Int!): [Post!]
+		isUsernameAvailable(username: String!): Boolean!
+		users(name: String!): [User!]
 	}
 
 	type Mutation {
@@ -12,6 +14,7 @@ export const typeDefs = gql`
 		unlikePost(postId: String!): String
 		submitComment(postId: String!, text: String!): String
 		deleteComment(postId: String!, commentId: String!): String
+		signUp(user: UserInfo!, profilePicUrl: String): User
 	}
 
 	scalar Date
@@ -19,6 +22,14 @@ export const typeDefs = gql`
 	enum Role {
 		user
 		admin
+	}
+
+	input UserInfo {
+		name: String!
+		email: String!
+		password: String!
+		username: String!
+		bio: String!
 	}
 
 	type User {
