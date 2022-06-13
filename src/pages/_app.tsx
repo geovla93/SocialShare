@@ -1,6 +1,7 @@
 import { useState } from "react";
+import type { AppProps } from "next/app";
 import NextNProgress from "nextjs-progressbar";
-import { Provider } from "next-auth/client";
+import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Hydrate } from "react-query/hydration";
 import { ReactQueryDevtools } from "react-query/devtools";
@@ -10,11 +11,11 @@ import Layout from "@/components/Layout/Layout";
 import "../styles/globals.css";
 import "react-toastify/dist/ReactToastify.css";
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: AppProps) {
 	const [queryClient] = useState(() => new QueryClient());
 
 	return (
-		<Provider session={pageProps.session}>
+		<SessionProvider session={pageProps.session}>
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={pageProps.dehydratedState}>
 					<NextNProgress
@@ -29,7 +30,7 @@ function MyApp({ Component, pageProps }) {
 					<ReactQueryDevtools initialIsOpen={false} />
 				</Hydrate>
 			</QueryClientProvider>
-		</Provider>
+		</SessionProvider>
 	);
 }
 

@@ -1,6 +1,6 @@
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon, LogoutIcon } from "@heroicons/react/outline";
-import { useSession, signOut } from "next-auth/client";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 
 import ProfilePic from "../Shared/ProfilePic";
