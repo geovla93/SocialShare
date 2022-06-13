@@ -2,6 +2,29 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
+1. Install dependencies:
+
+```bash
+npm run install
+# or
+yarn
+```
+
+2. Create a .env.local file at the root of the project and set the following env variables:
+
+- JWT_ENCRYPTION_KEY
+- JWT_SIGNING_PRIVATE_KEY
+- JWT_SECRET
+- MONGODB_URI
+
+3. Run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
 First, run the development server:
 
 ```bash
