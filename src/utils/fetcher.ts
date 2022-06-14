@@ -1,58 +1,22 @@
-import { request, gql } from "graphql-request";
-
-const PostsQuery = gql`
-  query PostsQuery($pageNumber: Int!) {
-    posts(pageNumber: $pageNumber) {
-      _id
-      user {
-        _id
-        name
-        email
-        username
-        bio
-        profilePicUrl
-        role
-      }
-      text
-      location
-      picUrl
-      likes {
-        user
-      }
-      comments {
-        _id
-        user {
-          _id
-          name
-          email
-          username
-          bio
-          profilePicUrl
-          role
-        }
-        text
-        date
-      }
-      createdAt
-    }
-  }
-`;
-
-const UsersQuery = gql`
-  query UsersQuery($name: String!) {
-    users(name: $name) {
-      _id
-      name
-      username
-      profilePicUrl
-    }
-  }
-`;
+import { everything } from "@/graphql/generated/genql";
+import client from "@/lib/genql";
+import { User } from "@/models";
 
 export const getPosts = async (pageNumber: number) => {
-  const { posts } = await request("/api/graphql", PostsQuery, {
-    pageNumber,
+  const posts = await client.query({
+    posts: [
+      { pageNumber },
+      {
+        ...everything,
+        userId: false,
+        user: { ...everything, createdAt: false, updatedAt: false },
+        likes: { userId: true },
+      },
+    ],
   });
+  if (!Array.isArray(posts)) {
+    throw new Error("Posts not returned");
+  }
 
   return {
     posts,
@@ -60,8 +24,16 @@ export const getPosts = async (pageNumber: number) => {
   };
 };
 
-export const getUsers = async (name: string) => {
-  if (name.length === 0) return;
-  const { users } = await request("/api/graphql", UsersQuery, { name });
+export const getUsers = async (
+  name: string
+): Promise<Pick<User, "id" | "image" | "name" | "username">[] | null> => {
+  if (name.length === 0) return null;
+  const users = await client.query({
+    users: [{ name }, { id: true, name: true, username: true, image: true }],
+  });
+  if (!Array.isArray(users)) {
+    throw new Error("Users not returned");
+  }
+
   return users;
 };

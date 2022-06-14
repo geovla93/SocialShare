@@ -137,6 +137,7 @@ export interface NexusGenFieldTypes {
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     id: string; // ID!
     image: string | null; // String
+    likes: NexusGenRootTypes['Like'] | null; // Like
     likesCount: number | null; // Int
     location: string | null; // String
     text: string; // String!
@@ -196,6 +197,7 @@ export interface NexusGenFieldTypeNames {
     createdAt: 'DateTime'
     id: 'ID'
     image: 'String'
+    likes: 'Like'
     likesCount: 'Int'
     location: 'String'
     text: 'String'

@@ -1,79 +1,5 @@
-import axios from "axios";
-import { request, gql } from "graphql-request";
-
-const SubmitPostMutation = gql`
-  mutation SubmitPostMutation(
-    $text: String!
-    $location: String
-    $picUrl: String
-  ) {
-    submitPost(text: $text, location: $location, picUrl: $picUrl) {
-      _id
-      user {
-        _id
-        name
-        email
-        username
-        bio
-        profilePicUrl
-        role
-      }
-      text
-      location
-      picUrl
-      likes {
-        user
-      }
-      comments {
-        _id
-        text
-        user {
-          _id
-          name
-          email
-          username
-          bio
-          profilePicUrl
-          role
-        }
-        date
-      }
-      createdAt
-    }
-  }
-`;
-
-const DeletePostMutation = gql`
-  mutation DeletePostMutation($postId: String!) {
-    deletePost(postId: $postId)
-  }
-`;
-
-const LikePostMutation = gql`
-  mutation LikePostMutation($postId: String!) {
-    likePost(postId: $postId) {
-      user
-    }
-  }
-`;
-
-const UnlikePostMutation = gql`
-  mutation UnlikePostMutation($postId: String!) {
-    unlikePost(postId: $postId)
-  }
-`;
-
-const SubmitCommentMutation = gql`
-  mutation SubmitCommentMutation($postId: String!, $text: String!) {
-    submitComment(postId: $postId, text: $text)
-  }
-`;
-
-const DeleteCommentMutation = gql`
-  mutation DeleteCommentMutation($postId: String!, $commentId: String!) {
-    deleteComment(postId: $postId, commentId: $commentId)
-  }
-`;
+import { everything } from "@/graphql/generated/genql";
+import client from "@/lib/genql";
 
 export const submitPost = async ({
   data,
@@ -83,10 +9,20 @@ export const submitPost = async ({
   picUrl?: string;
 }) => {
   try {
-    const post = await request("/api/graphql", SubmitPostMutation, {
-      ...data,
-      picUrl,
+    const post = await client.mutation({
+      submitPost: [
+        { text: data.text, location: data.location, image: picUrl },
+        {
+          ...everything,
+          userId: false,
+          user: { ...everything, createdAt: false, updatedAt: false },
+        },
+      ],
     });
+    if (typeof post === "undefined") {
+      throw new Error("Post not returned");
+    }
+
     return post;
   } catch (error) {
     console.error(error);
@@ -95,24 +31,26 @@ export const submitPost = async ({
 
 export const deletePost = async ({ postId }: { postId: string }) => {
   try {
-    await request("/api/graphql", DeletePostMutation, { postId });
+    await client.mutation({ deletePost: [{ postId }] });
   } catch (error) {
     console.error(error);
   }
 };
 
 export const likePost = async ({
+  likeId,
   postId,
   isLiked,
 }: {
+  likeId: string;
   postId: string;
   isLiked: boolean;
 }) => {
   try {
     if (isLiked) {
-      await request("/api/graphql", UnlikePostMutation, { postId });
+      await client.mutation({ unlikePost: [{ likeId, postId }] });
     } else {
-      await request("/api/graphql", LikePostMutation, { postId });
+      await client.mutation({ likePost: [{ postId }, {}] });
     }
   } catch (error) {
     console.error(error);
@@ -127,7 +65,7 @@ export const submitComment = async ({
   text: string;
 }) => {
   try {
-    await request("/api/graphql", SubmitCommentMutation, { postId, text });
+    await client.mutation({ submitComment: [{ postId, text }] });
   } catch (error) {
     console.error(error);
   }
@@ -141,7 +79,7 @@ export const deleteComment = async ({
   commentId: string;
 }) => {
   try {
-    await request("/api/graphql", DeleteCommentMutation, { postId, commentId });
+    await client.mutation({ deleteComment: [{ postId, commentId }] });
   } catch (error) {
     console.error(error);
   }

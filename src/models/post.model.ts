@@ -1,5 +1,8 @@
 import { ObjectId } from "mongodb";
 
+import { Like } from "./like.model";
+import { User } from "./user.model";
+
 export type Post = {
   id: string;
   createdAt: Date;
@@ -10,6 +13,8 @@ export type Post = {
   userId: string;
   commentsCount: number;
   likesCount: number;
+  user?: User;
+  likes?: Like[];
 };
 
 export class PostModel {
@@ -40,7 +45,7 @@ export class PostModel {
 
     return {
       ...rest,
-      id: post._id.toHexString(),
+      id: _id.toHexString(),
       userId: post.userId.toHexString(),
       likesCount: likesIds.length,
       commentsCount: commentsIds.length,

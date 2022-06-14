@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { InboxIcon, EyeIcon } from "@heroicons/react/outline";
 import { toast } from "react-toastify";
+import isEmail from "isemail";
 
 import FormInput from "@/components/Shared/FormInput";
 import Button from "@/components/Shared/Button";
@@ -63,14 +64,12 @@ const SigninPage: NextPage = () => {
         onSubmit={handleSubmit(onSubmit)}
       >
         <FormInput
-          name="email"
-          control={control}
-          rules={{
-            required: "Email is required.",
-            pattern: {
-              value:
-                /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-              message: "Email is not valid.",
+          controller={{
+            control,
+            name: "email",
+            rules: {
+              required: "Email is required.",
+              validate: (value) => isEmail.validate(value),
             },
           }}
           type="email"
@@ -78,13 +77,15 @@ const SigninPage: NextPage = () => {
           Icon={<InboxIcon className="w-6 h-6 text-blue-400" />}
         />
         <FormInput
-          name="password"
-          control={control}
-          rules={{
-            required: "Password is required.",
-            minLength: {
-              value: 8,
-              message: "Password must be at least 8 characters.",
+          controller={{
+            control,
+            name: "password",
+            rules: {
+              required: "Password is required.",
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters.",
+              },
               maxLength: {
                 value: 16,
                 message: "Password must be less than 16 characters.",
@@ -102,10 +103,10 @@ const SigninPage: NextPage = () => {
         />
         <Button
           type="submit"
-          styles="disabled:cursor-not-allowed"
+          style="disabled:cursor-not-allowed"
           disabled={submitDisabled}
         >
-          {formLoading ? <Spinner styles="text-gray-50 mx-auto" /> : "Log In"}
+          {formLoading ? <Spinner style="text-gray-50 mx-auto" /> : "Log In"}
         </Button>
       </form>
     </div>

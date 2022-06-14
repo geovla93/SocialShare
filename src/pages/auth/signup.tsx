@@ -25,6 +25,7 @@ import ImageDropDiv from "@/components/Shared/ImageDropDiv";
 import Spinner from "@/components/Shared/Spinner";
 import uploadPic from "@/utils/cloudinary";
 import { registerUser } from "@/utils/user";
+import IsEmail from "isemail";
 
 const CheckUsernameQuery = gql`
   query CheckUsernameQuery($username: String!) {
@@ -44,14 +45,13 @@ const SignupPage: NextPage = () => {
   const [usernameAvailable, setUsernameAvailable] = useState(false);
   const [usernameLoading, setUsernameLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [media, setMedia] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [highlighted, setHighlighted] = useState(false);
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const router = useRouter();
-  const inputRef = useRef();
+  const inputRef = useRef<HTMLInputElement>(null);
   const {
     control,
     reset,
@@ -136,15 +136,10 @@ const SignupPage: NextPage = () => {
       return;
     }
 
-    const { response } = await registerUser(data, profilePicUrl);
+    await registerUser(data, profilePicUrl);
 
-    if (response.errors) {
-      toast.error(response.errors[0].message);
-      setFormLoading(false);
-    } else {
-      router.push("/auth/signin");
-      setFormLoading(false);
-    }
+    setFormLoading(false);
+    router.push("/auth/signin");
   };
 
   return (
@@ -164,21 +159,25 @@ const SignupPage: NextPage = () => {
         />
         <div className="flex flex-col md:flex-row space-y-6 w-full md:space-y-0 md:space-x-4">
           <FormInput
-            name="name"
-            control={control}
-            rules={{ required: "Name is required." }}
+            controller={{
+              control,
+              name: "name",
+              rules: { required: "Name is required." },
+            }}
             type="text"
             placeholder="Name"
             Icon={<UserIcon className="w-6 h-6 text-blue-400" />}
           />
           <FormInput
-            name="username"
-            control={control}
-            rules={{
-              required: "Username is required",
-              minLength: {
-                value: 1,
-                message: "Username must be at least 1 character.",
+            controller={{
+              control,
+              name: "username",
+              rules: {
+                required: "Username is required.",
+                minLength: {
+                  value: 1,
+                  message: "Username must be at least 1 character.",
+                },
               },
             }}
             type="text"
@@ -191,21 +190,19 @@ const SignupPage: NextPage = () => {
                   <XCircleIcon className="w-6 h-6 text-blue-400" />
                 )
               ) : (
-                <Spinner styles="text-blue-400" />
+                <Spinner style="text-blue-400" />
               )
             }
           />
         </div>
         <div className="flex flex-col md:flex-row space-y-6 w-full md:space-y-0 md:space-x-4">
           <FormInput
-            name="email"
-            control={control}
-            rules={{
-              required: "Email is required.",
-              pattern: {
-                value:
-                  /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                message: "Email is not valid.",
+            controller={{
+              control,
+              name: "email",
+              rules: {
+                required: "Email is required.",
+                validate: (value) => IsEmail.validate(value),
               },
             }}
             type="email"
@@ -213,13 +210,15 @@ const SignupPage: NextPage = () => {
             Icon={<InboxIcon className="w-6 h-6 text-blue-400" />}
           />
           <FormInput
-            name="password"
-            control={control}
-            rules={{
-              required: "Password is required.",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters.",
+            controller={{
+              control,
+              name: "password",
+              rules: {
+                required: "Password is required.",
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters.",
+                },
                 maxLength: {
                   value: 16,
                   message: "Password must be less than 16 characters.",
@@ -237,19 +236,21 @@ const SignupPage: NextPage = () => {
           />
         </div>
         <FormInput
-          name="bio"
-          control={control}
-          rules={{ required: "Bio is required." }}
+          controller={{
+            control,
+            name: "bio",
+            rules: { required: "Bio is required." },
+          }}
           type="text"
           placeholder="Bio"
           Icon={<BookOpenIcon className="w-6 h-6 text-blue-400" />}
         />
         <Button
           type="submit"
-          styles="disabled:cursor-not-allowed"
+          style="disabled:cursor-not-allowed"
           disabled={submitDisabled || !usernameAvailable}
         >
-          {formLoading ? <Spinner styles="text-gray-50 mx-auto" /> : "Register"}
+          {formLoading ? <Spinner style="text-gray-50 mx-auto" /> : "Register"}
         </Button>
       </form>
     </div>

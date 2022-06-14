@@ -1,32 +1,6 @@
-import { signIn, SignInResponse } from "next-auth/react";
-import { request, gql } from "graphql-request";
+import { signIn } from "next-auth/react";
 
-const SignUpMutation = gql`
-  mutation SignUpMutation(
-    $name: String!
-    $email: String!
-    $password: String!
-    $username: String!
-    $bio: String!
-    $profilePicUrl: String
-  ) {
-    signUp(
-      user: {
-        name: $name
-        email: $email
-        password: $password
-        username: $username
-        bio: $bio
-      }
-      profilePicUrl: $profilePicUrl
-    ) {
-      _id
-      name
-      email
-      createdAt
-    }
-  }
-`;
+import client from "@/lib/genql";
 
 export const registerUser = async (
   user: {
@@ -38,37 +12,15 @@ export const registerUser = async (
   },
   profilePicUrl?: string
 ) => {
-  try {
-    const response = await request("/api/graphql", SignUpMutation, {
-      ...user,
-      profilePicUrl,
-    });
-
-    return response;
-  } catch (error) {
-    return JSON.parse(JSON.stringify(error, null, 2));
-  }
+  await client.mutation({ signUp: [{ user, image: profilePicUrl }, {}] });
 };
 
 export const loginUser = async (user: { email: string; password: string }) => {
-  try {
-    const res = await signIn<"credentials">("credentials", {
-      redirect: false,
-      email: user.email,
-      password: user.password,
-    });
+  const res = await signIn<"credentials">("credentials", {
+    redirect: false,
+    email: user.email,
+    password: user.password,
+  });
 
-    return res;
-  } catch (error) {
-    throw error;
-  }
+  return res;
 };
-
-type RequireOnlyOne<T, Keys extends keyof T = keyof T> = Pick<
-  T,
-  Exclude<keyof T, Keys>
-> &
-  {
-    [K in Keys]-?: Required<Pick<T, K>> &
-      Partial<Record<Exclude<Keys, K>, undefined>>;
-  }[Keys];

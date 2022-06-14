@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { Db, MongoClient, MongoClientOptions } from "mongodb";
 
 declare var global: NodeJS.Global;

@@ -3,10 +3,9 @@ import { ForbiddenError } from "apollo-server-micro";
 import { ObjectId } from "mongodb";
 
 import { UserObject } from "./user";
-import { CommentObject } from "./comment";
 import { LikeObject } from "./like";
 import { connectToDatabase } from "@/lib/mongodb";
-import { PostModel, UserModel } from "@/models";
+import { LikeModel, PostModel, UserModel } from "@/models";
 
 // Object Types
 export const PostObject = objectType({
@@ -33,6 +32,17 @@ export const PostObject = objectType({
     t.string("image");
     t.int("likesCount");
     t.int("commentsCount");
+    t.field("likes", {
+      type: LikeObject,
+      resolve: async (root) => {
+        const { db } = await connectToDatabase();
+        const likes = await db
+          .collection<LikeModel>("likes")
+          .find({ postId: new ObjectId(root.id) })
+          .toArray();
+        return likes.map(LikeModel.toDto);
+      },
+    });
   },
 });
 
