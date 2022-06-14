@@ -1,7 +1,8 @@
 import { everything } from "@/graphql/generated/genql";
 import client from "@/lib/genql";
+import { Comment, Like, Post } from "@/models";
 
-export const getPostLikes = async (postId: string) => {
+export const getPostLikes = async (postId: string): Promise<Like[]> => {
   const { getPostLikes: likes } = await client.query({
     getPostLikes: [
       { postId },
@@ -19,7 +20,7 @@ export const getPostLikes = async (postId: string) => {
   return likes;
 };
 
-export const getPostComments = async (postId: string) => {
+export const getPostComments = async (postId: string): Promise<Comment[]> => {
   const { getPostComments: comments } = await client.query({
     getPostComments: [
       { postId },
@@ -39,7 +40,7 @@ export const getPostComments = async (postId: string) => {
     throw new Error("No comments found");
   }
 
-  return comments;
+  return comments as Comment[];
 };
 
 export const submitPost = async ({
@@ -48,7 +49,7 @@ export const submitPost = async ({
 }: {
   data: { text: string; location?: string };
   picUrl?: string;
-}) => {
+}): Promise<Post> => {
   try {
     const post = await client.mutation({
       submitPost: [
@@ -64,9 +65,10 @@ export const submitPost = async ({
       throw new Error("Post not returned");
     }
 
-    return post;
+    return post as Post;
   } catch (error) {
-    console.error(error);
+    console.log(error);
+    throw error;
   }
 };
 

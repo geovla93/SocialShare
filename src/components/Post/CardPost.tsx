@@ -25,7 +25,6 @@ type CartPostProps = {
 
 const CardPost: FC<CartPostProps> = ({ post }) => {
   const { data: likes } = useLikes(post.id);
-  const [errorMessage, setErrorMessage] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const { data: session } = useSession();
   const deleteMutation = useDeletePost();
@@ -34,38 +33,21 @@ const CardPost: FC<CartPostProps> = ({ post }) => {
   const commentRef = useRef<HTMLInputElement>(null);
 
   const postDate = calculateDate(post.createdAt.toString());
-  console.log(
-    "🚀 ~ file: CardPost.tsx ~ line 40 ~ post.likesCount",
-    post.likesCount
-  );
+
   const isLiked =
     post.likesCount > 0 &&
     !!likes?.find((like) => like.userId === session?.user.id);
-  console.log("🚀 ~ file: CardPost.tsx ~ line 38 ~ isLiked", isLiked);
 
   const handleDeletePost = async () => {
-    try {
-      await deleteMutation.mutateAsync({ postId: post.id });
-    } catch (error: any) {
-      setErrorMessage(error.message);
-    }
+    await deleteMutation.mutateAsync({ postId: post.id });
   };
 
   const handleLikePost = async () => {
-    try {
-      // TODO: fetch likes from server
-      await likeMutation.mutateAsync({ postId: post.id, isLiked });
-    } catch (error: any) {
-      setErrorMessage(error.message);
-    }
+    await likeMutation.mutateAsync({ postId: post.id, isLiked });
   };
 
   const handleSubmitComment = async (text: string) => {
-    try {
-      await commentMutation.mutateAsync({ postId: post.id, text });
-    } catch (error: any) {
-      setErrorMessage(error.message);
-    }
+    await commentMutation.mutateAsync({ postId: post.id, text });
   };
 
   return (

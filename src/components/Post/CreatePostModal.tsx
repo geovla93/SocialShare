@@ -1,5 +1,4 @@
 import {
-  useState,
   useRef,
   useEffect,
   FC,
@@ -41,7 +40,6 @@ const CreatePostModal: FC<CreatePostModalProps> = ({
   handleImageChange,
   mediaRef,
 }) => {
-  const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
   const mutation = useCreatePost();
   const modalRef = useRef<HTMLInputElement>(null);
@@ -74,18 +72,13 @@ const CreatePostModal: FC<CreatePostModalProps> = ({
     let picUrl;
     if (media !== null) picUrl = await uploadPic(media);
     if (media !== null && !picUrl) {
-      setError("Error Uploading Image");
       return;
     }
 
-    try {
-      await mutation.mutateAsync({
-        data,
-        picUrl,
-      });
-    } catch (error: any) {
-      setError(error.message);
-    }
+    await mutation.mutateAsync({
+      data,
+      picUrl,
+    });
 
     setMedia(null);
     setMediaPreview(null);

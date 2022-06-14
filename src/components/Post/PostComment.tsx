@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import Link from "next/link";
 import { XIcon } from "@heroicons/react/outline";
 import { useSession } from "next-auth/react";
@@ -13,16 +13,11 @@ type PostCommentProps = {
 };
 
 const PostComment: FC<PostCommentProps> = ({ comment, postId }) => {
-  const [errorMessage, setErrorMessage] = useState(null);
   const { data: session } = useSession();
   const { mutateAsync } = useDeleteComment();
 
   const handleDeleteComment = async () => {
-    try {
-      await mutateAsync({ postId, commentId: comment.id });
-    } catch (error: any) {
-      setErrorMessage(error.message);
-    }
+    await mutateAsync({ postId, commentId: comment.id });
   };
 
   return (
