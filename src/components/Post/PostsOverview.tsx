@@ -28,7 +28,10 @@ const PostsOverview: FC = () => {
   return (
     <InfiniteScroll
       dataLength={dataLength || 0}
-      next={fetchNextPage}
+      next={() => {
+        setTimeout(() => {}, 500);
+        fetchNextPage();
+      }}
       hasMore={!!hasNextPage}
       loader={Array(4)
         .fill(undefined)
@@ -42,7 +45,7 @@ const PostsOverview: FC = () => {
           page.nextId && (
             <Fragment key={page.nextId}>
               {page.posts.map((post) => (
-                <CardPost key={post._id} post={post} />
+                <CardPost key={post.id} post={post} />
               ))}
             </Fragment>
           )

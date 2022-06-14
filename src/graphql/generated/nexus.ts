@@ -137,7 +137,6 @@ export interface NexusGenFieldTypes {
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     id: string; // ID!
     image: string | null; // String
-    likes: NexusGenRootTypes['Like'] | null; // Like
     likesCount: number | null; // Int
     location: string | null; // String
     text: string; // String!
@@ -146,6 +145,8 @@ export interface NexusGenFieldTypes {
     userId: string; // String!
   }
   Query: { // field return type
+    getPostComments: NexusGenRootTypes['Comment'][]; // [Comment!]!
+    getPostLikes: NexusGenRootTypes['Like'][]; // [Like!]!
     isUsernameAvailable: boolean; // Boolean!
     posts: NexusGenRootTypes['Post'][] | null; // [Post!]
     users: NexusGenRootTypes['User'][] | null; // [User!]
@@ -197,7 +198,6 @@ export interface NexusGenFieldTypeNames {
     createdAt: 'DateTime'
     id: 'ID'
     image: 'String'
-    likes: 'Like'
     likesCount: 'Int'
     location: 'String'
     text: 'String'
@@ -206,6 +206,8 @@ export interface NexusGenFieldTypeNames {
     userId: 'String'
   }
   Query: { // field return type name
+    getPostComments: 'Comment'
+    getPostLikes: 'Like'
     isUsernameAvailable: 'Boolean'
     posts: 'Post'
     users: 'User'
@@ -249,11 +251,16 @@ export interface NexusGenArgTypes {
       text: string; // String!
     }
     unlikePost: { // args
-      likeId: string; // String!
       postId: string; // String!
     }
   }
   Query: {
+    getPostComments: { // args
+      postId: string; // String!
+    }
+    getPostLikes: { // args
+      postId: string; // String!
+    }
     isUsernameAvailable: { // args
       username: string; // String!
     }

@@ -6,8 +6,9 @@ const useCreateComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation(submitComment, {
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries("posts");
+      queryClient.invalidateQueries(["comments", variables.postId]);
     },
   });
 };

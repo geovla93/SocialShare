@@ -1,5 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { Session, User } from "next-auth";
 import { JWT } from "next-auth/jwt";
+
+import { Role } from "@/models";
 
 /** Example on how to extend the built-in session types */
 declare module "next-auth" {
@@ -24,7 +27,6 @@ declare module "next-auth" {
 /** Example on how to extend the built-in types for JWT */
 declare module "next-auth/jwt" {
   interface JWT {
-    /** This is an example. You can find me in types/next-auth.d.ts */
-    // bar: number
+    user: User;
   }
 }

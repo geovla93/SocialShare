@@ -47,7 +47,6 @@ export interface Post {
     createdAt: Scalars['DateTime']
     id: Scalars['ID']
     image?: Scalars['String']
-    likes?: Like
     likesCount?: Scalars['Int']
     location?: Scalars['String']
     text: Scalars['String']
@@ -58,6 +57,8 @@ export interface Post {
 }
 
 export interface Query {
+    getPostComments: Comment[]
+    getPostLikes: Like[]
     isUsernameAvailable: Scalars['Boolean']
     posts?: Post[]
     users?: User[]
@@ -111,7 +112,7 @@ export interface MutationRequest{
     signUp?: [{image?: (Scalars['String'] | null),user: SignUpInput},UserRequest]
     submitComment?: [{postId: Scalars['String'],text: Scalars['String']}]
     submitPost?: [{image?: (Scalars['String'] | null),location?: (Scalars['String'] | null),text: Scalars['String']},PostRequest]
-    unlikePost?: [{likeId: Scalars['String'],postId: Scalars['String']}]
+    unlikePost?: [{postId: Scalars['String']}]
     __typename?: boolean | number
     __scalar?: boolean | number
 }
@@ -121,7 +122,6 @@ export interface PostRequest{
     createdAt?: boolean | number
     id?: boolean | number
     image?: boolean | number
-    likes?: LikeRequest
     likesCount?: boolean | number
     location?: boolean | number
     text?: boolean | number
@@ -133,6 +133,8 @@ export interface PostRequest{
 }
 
 export interface QueryRequest{
+    getPostComments?: [{postId: Scalars['String']},CommentRequest]
+    getPostLikes?: [{postId: Scalars['String']},LikeRequest]
     isUsernameAvailable?: [{username: Scalars['String']}]
     posts?: [{pageNumber: Scalars['Int']},PostRequest]
     users?: [{name: Scalars['String']},UserRequest]
@@ -253,7 +255,7 @@ export interface MutationPromiseChain{
     signUp: ((args: {image?: (Scalars['String'] | null),user: SignUpInput}) => UserPromiseChain & {get: <R extends UserRequest>(request: R, defaultValue?: (FieldsSelection<User, R> | undefined)) => Promise<(FieldsSelection<User, R> | undefined)>}),
     submitComment: ((args: {postId: Scalars['String'],text: Scalars['String']}) => {get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Promise<(Scalars['String'] | undefined)>}),
     submitPost: ((args: {image?: (Scalars['String'] | null),location?: (Scalars['String'] | null),text: Scalars['String']}) => PostPromiseChain & {get: <R extends PostRequest>(request: R, defaultValue?: (FieldsSelection<Post, R> | undefined)) => Promise<(FieldsSelection<Post, R> | undefined)>}),
-    unlikePost: ((args: {likeId: Scalars['String'],postId: Scalars['String']}) => {get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Promise<(Scalars['String'] | undefined)>})
+    unlikePost: ((args: {postId: Scalars['String']}) => {get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Promise<(Scalars['String'] | undefined)>})
 }
 
 export interface MutationObservableChain{
@@ -263,7 +265,7 @@ export interface MutationObservableChain{
     signUp: ((args: {image?: (Scalars['String'] | null),user: SignUpInput}) => UserObservableChain & {get: <R extends UserRequest>(request: R, defaultValue?: (FieldsSelection<User, R> | undefined)) => Observable<(FieldsSelection<User, R> | undefined)>}),
     submitComment: ((args: {postId: Scalars['String'],text: Scalars['String']}) => {get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Observable<(Scalars['String'] | undefined)>}),
     submitPost: ((args: {image?: (Scalars['String'] | null),location?: (Scalars['String'] | null),text: Scalars['String']}) => PostObservableChain & {get: <R extends PostRequest>(request: R, defaultValue?: (FieldsSelection<Post, R> | undefined)) => Observable<(FieldsSelection<Post, R> | undefined)>}),
-    unlikePost: ((args: {likeId: Scalars['String'],postId: Scalars['String']}) => {get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Observable<(Scalars['String'] | undefined)>})
+    unlikePost: ((args: {postId: Scalars['String']}) => {get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Observable<(Scalars['String'] | undefined)>})
 }
 
 export interface PostPromiseChain{
@@ -271,7 +273,6 @@ export interface PostPromiseChain{
     createdAt: ({get: (request?: boolean|number, defaultValue?: Scalars['DateTime']) => Promise<Scalars['DateTime']>}),
     id: ({get: (request?: boolean|number, defaultValue?: Scalars['ID']) => Promise<Scalars['ID']>}),
     image: ({get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Promise<(Scalars['String'] | undefined)>}),
-    likes: (LikePromiseChain & {get: <R extends LikeRequest>(request: R, defaultValue?: (FieldsSelection<Like, R> | undefined)) => Promise<(FieldsSelection<Like, R> | undefined)>}),
     likesCount: ({get: (request?: boolean|number, defaultValue?: (Scalars['Int'] | undefined)) => Promise<(Scalars['Int'] | undefined)>}),
     location: ({get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Promise<(Scalars['String'] | undefined)>}),
     text: ({get: (request?: boolean|number, defaultValue?: Scalars['String']) => Promise<Scalars['String']>}),
@@ -285,7 +286,6 @@ export interface PostObservableChain{
     createdAt: ({get: (request?: boolean|number, defaultValue?: Scalars['DateTime']) => Observable<Scalars['DateTime']>}),
     id: ({get: (request?: boolean|number, defaultValue?: Scalars['ID']) => Observable<Scalars['ID']>}),
     image: ({get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Observable<(Scalars['String'] | undefined)>}),
-    likes: (LikeObservableChain & {get: <R extends LikeRequest>(request: R, defaultValue?: (FieldsSelection<Like, R> | undefined)) => Observable<(FieldsSelection<Like, R> | undefined)>}),
     likesCount: ({get: (request?: boolean|number, defaultValue?: (Scalars['Int'] | undefined)) => Observable<(Scalars['Int'] | undefined)>}),
     location: ({get: (request?: boolean|number, defaultValue?: (Scalars['String'] | undefined)) => Observable<(Scalars['String'] | undefined)>}),
     text: ({get: (request?: boolean|number, defaultValue?: Scalars['String']) => Observable<Scalars['String']>}),
@@ -295,12 +295,16 @@ export interface PostObservableChain{
 }
 
 export interface QueryPromiseChain{
+    getPostComments: ((args: {postId: Scalars['String']}) => {get: <R extends CommentRequest>(request: R, defaultValue?: FieldsSelection<Comment, R>[]) => Promise<FieldsSelection<Comment, R>[]>}),
+    getPostLikes: ((args: {postId: Scalars['String']}) => {get: <R extends LikeRequest>(request: R, defaultValue?: FieldsSelection<Like, R>[]) => Promise<FieldsSelection<Like, R>[]>}),
     isUsernameAvailable: ((args: {username: Scalars['String']}) => {get: (request?: boolean|number, defaultValue?: Scalars['Boolean']) => Promise<Scalars['Boolean']>}),
     posts: ((args: {pageNumber: Scalars['Int']}) => {get: <R extends PostRequest>(request: R, defaultValue?: (FieldsSelection<Post, R>[] | undefined)) => Promise<(FieldsSelection<Post, R>[] | undefined)>}),
     users: ((args: {name: Scalars['String']}) => {get: <R extends UserRequest>(request: R, defaultValue?: (FieldsSelection<User, R>[] | undefined)) => Promise<(FieldsSelection<User, R>[] | undefined)>})
 }
 
 export interface QueryObservableChain{
+    getPostComments: ((args: {postId: Scalars['String']}) => {get: <R extends CommentRequest>(request: R, defaultValue?: FieldsSelection<Comment, R>[]) => Observable<FieldsSelection<Comment, R>[]>}),
+    getPostLikes: ((args: {postId: Scalars['String']}) => {get: <R extends LikeRequest>(request: R, defaultValue?: FieldsSelection<Like, R>[]) => Observable<FieldsSelection<Like, R>[]>}),
     isUsernameAvailable: ((args: {username: Scalars['String']}) => {get: (request?: boolean|number, defaultValue?: Scalars['Boolean']) => Observable<Scalars['Boolean']>}),
     posts: ((args: {pageNumber: Scalars['Int']}) => {get: <R extends PostRequest>(request: R, defaultValue?: (FieldsSelection<Post, R>[] | undefined)) => Observable<(FieldsSelection<Post, R>[] | undefined)>}),
     users: ((args: {name: Scalars['String']}) => {get: <R extends UserRequest>(request: R, defaultValue?: (FieldsSelection<User, R>[] | undefined)) => Observable<(FieldsSelection<User, R>[] | undefined)>})

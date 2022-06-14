@@ -43,6 +43,32 @@ export const LikeObject = objectType({
   },
 });
 
+// Query Types
+export const GetLikesQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("getPostLikes", {
+      type: LikeObject,
+      args: {
+        postId: nonNull(stringArg()),
+      },
+      resolve: async (_root, { postId }, { session }) => {
+        if (!session) {
+          throw new ForbiddenError("Not logged in");
+        }
+
+        const { db } = await connectToDatabase();
+
+        const likes = await db
+          .collection<LikeModel>("likes")
+          .find({ postId: new ObjectId(postId) })
+          .toArray();
+        return likes.map((like) => LikeModel.toDto(like));
+      },
+    });
+  },
+});
+
 // Mutation Types
 export const LikePostMutation = extendType({
   type: "Mutation",
@@ -66,11 +92,14 @@ export const LikePostMutation = extendType({
             throw new Error("Post not found");
           }
 
-          const like = new LikeModel({
+          const like = LikeModel.createDocument({
             postId: new ObjectId(postId),
             userId: new ObjectId(userId),
           });
           await db.collection<LikeModel>("likes").insertOne(like);
+          await db
+            .collection<PostModel>("posts")
+            .updateOne({ _id: new ObjectId(postId) }, { $inc: { likes: 1 } });
 
           return LikeModel.toDto(like);
         } catch (error) {
@@ -88,12 +117,10 @@ export const UnlikePostMutation = extendType({
     t.string("unlikePost", {
       args: {
         postId: nonNull(stringArg()),
-        likeId: nonNull(stringArg()),
       },
-      resolve: async (_root, { postId, likeId }, { session }) => {
+      resolve: async (_root, { postId }, { session }) => {
         try {
           if (!session) throw new ForbiddenError("Unauthorized");
-          const userId = session.user.id;
 
           const { db } = await connectToDatabase();
 
@@ -106,10 +133,16 @@ export const UnlikePostMutation = extendType({
 
           const result = await db
             .collection<LikeModel>("likes")
-            .findOneAndDelete({ _id: new ObjectId(likeId) });
+            .findOneAndDelete({
+              postId: new ObjectId(postId),
+              userId: new ObjectId(session.user.id),
+            });
           if (!result.value) {
             throw new Error("Like not found");
           }
+          await db
+            .collection<PostModel>("posts")
+            .updateOne({ _id: new ObjectId(postId) }, { $inc: { likes: -1 } });
 
           return "Post unliked successfully";
         } catch (error) {

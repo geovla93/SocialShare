@@ -1,25 +1,26 @@
 import { everything } from "@/graphql/generated/genql";
 import client from "@/lib/genql";
-import { User } from "@/models";
+import { Post, User } from "@/models";
 
-export const getPosts = async (pageNumber: number) => {
-  const posts = await client.query({
+export const getPosts = async (
+  pageNumber: number
+): Promise<{ posts: Post[]; nextId?: number }> => {
+  const { posts } = await client.query({
     posts: [
       { pageNumber },
       {
         ...everything,
-        userId: false,
         user: { ...everything, createdAt: false, updatedAt: false },
-        likes: { userId: true },
       },
     ],
   });
-  if (!Array.isArray(posts)) {
+  if (typeof posts === "undefined") {
     throw new Error("Posts not returned");
   }
+  console.log("🚀 ~ file: fetcher.ts ~ line 16 ~ getPosts ~ posts", posts);
 
   return {
-    posts,
+    posts: posts as Post[],
     nextId: posts.length > 0 ? pageNumber + 1 : undefined,
   };
 };

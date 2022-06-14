@@ -15,6 +15,7 @@ import useDeletePost from "@/hooks/useDeletePost";
 import useLikePost from "@/hooks/useLikePost";
 import useCreateComment from "@/hooks/useCreateComment";
 import { Post } from "@/models";
+import useLikes from "@/hooks/useLikes";
 
 const PostModal = dynamic(() => import("./PostModal"));
 
@@ -23,6 +24,7 @@ type CartPostProps = {
 };
 
 const CardPost: FC<CartPostProps> = ({ post }) => {
+  const { data: likes } = useLikes(post.id);
   const [errorMessage, setErrorMessage] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const { data: session } = useSession();
@@ -31,10 +33,15 @@ const CardPost: FC<CartPostProps> = ({ post }) => {
   const commentMutation = useCreateComment();
   const commentRef = useRef<HTMLInputElement>(null);
 
-  const postDate = calculateDate(post.createdAt);
+  const postDate = calculateDate(post.createdAt.toString());
+  console.log(
+    "🚀 ~ file: CardPost.tsx ~ line 40 ~ post.likesCount",
+    post.likesCount
+  );
   const isLiked =
     post.likesCount > 0 &&
-    !!post.likes?.find((like) => like.userId === session?.user.id);
+    !!likes?.find((like) => like.userId === session?.user.id);
+  console.log("🚀 ~ file: CardPost.tsx ~ line 38 ~ isLiked", isLiked);
 
   const handleDeletePost = async () => {
     try {
@@ -47,7 +54,7 @@ const CardPost: FC<CartPostProps> = ({ post }) => {
   const handleLikePost = async () => {
     try {
       // TODO: fetch likes from server
-      // await likeMutation.mutateAsync({ postId: post.id, isLiked });
+      await likeMutation.mutateAsync({ postId: post.id, isLiked });
     } catch (error: any) {
       setErrorMessage(error.message);
     }
@@ -65,13 +72,17 @@ const CardPost: FC<CartPostProps> = ({ post }) => {
     <Card>
       <div className="flex flex-col space-y-2">
         <div className="flex items-center space-x-4">
-          <Link href={`/profile/${post.user?.username}`}>
-            <ProfilePic
-              style="w-10 h-10 cursor-pointer"
-              src={post.user?.image ?? ""}
-              alt={post.user?.name ?? ""}
-            />
-          </Link>
+          {post.user && (
+            <Link href={`/profile/${post.user.username}`}>
+              <a>
+                <ProfilePic
+                  style="w-10 h-10 cursor-pointer"
+                  src={post.user.image}
+                  alt={post.user.name}
+                />
+              </a>
+            </Link>
+          )}
           <div className="flex-1">
             <Link href={`/profile/${post.user?.username}`}>
               <a className="text-blue-500 text-xl font-semibold cursor-pointer">
@@ -93,16 +104,15 @@ const CardPost: FC<CartPostProps> = ({ post }) => {
         <p className="text-gray-800 text-lg">{post.text}</p>
         {post.image && (
           <div
-            className="relative w-full h-full cursor-pointer"
+            className="relative w-[500px] h-[500px] cursor-pointer"
             onClick={() => setShowModal(true)}
           >
             <Image
-              className="object-cover object-center"
               src={post.image}
               alt={`Post photo from ${post.user?.name}`}
-              width={500}
-              height={500}
-              layout="responsive"
+              layout="fill"
+              objectFit="cover"
+              objectPosition="center"
             />
           </div>
         )}

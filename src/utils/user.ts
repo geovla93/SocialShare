@@ -12,7 +12,9 @@ export const registerUser = async (
   },
   profilePicUrl?: string
 ) => {
-  await client.mutation({ signUp: [{ user, image: profilePicUrl }, {}] });
+  await client.mutation({
+    signUp: [{ user, image: profilePicUrl }, { id: true }],
+  });
 };
 
 export const loginUser = async (user: { email: string; password: string }) => {

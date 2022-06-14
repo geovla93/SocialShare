@@ -35,7 +35,7 @@ type Mutation {
   signUp(image: String, user: SignUpInput!): User
   submitComment(postId: String!, text: String!): String
   submitPost(image: String, location: String, text: String!): Post
-  unlikePost(likeId: String!, postId: String!): String
+  unlikePost(postId: String!): String
 }
 
 type Post {
@@ -43,7 +43,6 @@ type Post {
   createdAt: DateTime!
   id: ID!
   image: String
-  likes: Like
   likesCount: Int
   location: String
   text: String!
@@ -53,6 +52,8 @@ type Post {
 }
 
 type Query {
+  getPostComments(postId: String!): [Comment!]!
+  getPostLikes(postId: String!): [Like!]!
   isUsernameAvailable(username: String!): Boolean!
   posts(pageNumber: Int!): [Post!]
   users(name: String!): [User!]

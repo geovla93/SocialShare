@@ -15,6 +15,8 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { hashPassword } from "@/lib/auth";
 
 const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/;
+const userPng =
+  "https://res.cloudinary.com/geovla/image/upload/v1651325202/assets/user_avatar.png";
 
 // Object Types
 export const UserObject = objectType({
@@ -62,7 +64,7 @@ export const SignUpMutation = extendType({
             username,
             email,
             password: hashedPassword,
-            image: image === null ? undefined : image,
+            image: image || userPng,
             bio,
           });
           const result = await db

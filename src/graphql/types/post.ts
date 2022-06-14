@@ -1,11 +1,10 @@
 import { extendType, intArg, nonNull, objectType, stringArg } from "nexus";
 import { ForbiddenError } from "apollo-server-micro";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 import { UserObject } from "./user";
-import { LikeObject } from "./like";
 import { connectToDatabase } from "@/lib/mongodb";
-import { LikeModel, PostModel, UserModel } from "@/models";
+import { PostModel, UserModel } from "@/models";
 
 // Object Types
 export const PostObject = objectType({
@@ -22,6 +21,7 @@ export const PostObject = objectType({
         const user = await db
           .collection<UserModel>("users")
           .findOne({ _id: new ObjectId(root.userId) });
+        console.log("🚀 ~ file: post.ts ~ line 25 ~ resolve: ~ user", user);
         if (!user) return null;
 
         return UserModel.toDto(user);
@@ -32,17 +32,6 @@ export const PostObject = objectType({
     t.string("image");
     t.int("likesCount");
     t.int("commentsCount");
-    t.field("likes", {
-      type: LikeObject,
-      resolve: async (root) => {
-        const { db } = await connectToDatabase();
-        const likes = await db
-          .collection<LikeModel>("likes")
-          .find({ postId: new ObjectId(root.id) })
-          .toArray();
-        return likes.map(LikeModel.toDto);
-      },
-    });
   },
 });
 
@@ -54,6 +43,33 @@ export const GetPostsQuery = extendType({
       type: PostObject,
       args: {
         pageNumber: nonNull(intArg()),
+      },
+      resolve: async (root, { pageNumber }, { session }) => {
+        if (!session) {
+          throw new ForbiddenError("Not logged in");
+        }
+
+        const { db } = await connectToDatabase();
+
+        const size = 4;
+        let posts: WithId<PostModel>[] = [];
+
+        if (pageNumber === 1) {
+          posts = await db
+            .collection<PostModel>("posts")
+            .find({}, { limit: size, sort: { createdAt: -1 } })
+            .toArray();
+          console.log("🚀 ~ file: post.ts ~ line 62 ~ resolve: ~ posts", posts);
+        } else {
+          const skips = size * (pageNumber - 1);
+          posts = await db
+            .collection<PostModel>("posts")
+            .find({}, { skip: skips, limit: 4, sort: { createdAt: -1 } })
+            .toArray();
+        }
+        const ret = posts.map((post) => PostModel.toDto(post));
+        console.log("🚀 ~ file: post.ts ~ line 72 ~ resolve: ~ ret", ret);
+        return ret;
       },
     });
   },
@@ -79,7 +95,10 @@ export const SubmitPostMutation = extendType({
             throw new Error("Text must be at least 1 character");
           }
 
-          const newPost = new PostModel({ text, userId: new ObjectId(userId) });
+          const newPost = PostModel.createDocument({
+            text,
+            userId: new ObjectId(userId),
+          });
           if (location) newPost.location = location;
           if (image) newPost.image = image;
 

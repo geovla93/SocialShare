@@ -44,6 +44,32 @@ export const CommentObject = objectType({
   },
 });
 
+// Query Types
+export const GetCommentsQuery = extendType({
+  type: "Query",
+  definition(t) {
+    t.nonNull.list.nonNull.field("getPostComments", {
+      type: CommentObject,
+      args: {
+        postId: nonNull(stringArg()),
+      },
+      resolve: async (_root, { postId }, { session }) => {
+        if (!session) {
+          throw new ForbiddenError("Not logged in");
+        }
+
+        const { db } = await connectToDatabase();
+        const comments = await db
+          .collection<CommentModel>("comments")
+          .find({ postId: new ObjectId(postId) })
+          .toArray();
+
+        return comments.map((comment) => CommentModel.toDto(comment));
+      },
+    });
+  },
+});
+
 // Mutation Types
 export const SubmitCommentMutation = extendType({
   type: "Mutation",
@@ -67,12 +93,18 @@ export const SubmitCommentMutation = extendType({
             throw new Error("Post not found");
           }
 
-          const comment = new CommentModel({
+          const comment = CommentModel.createDocument({
             text,
             userId: new ObjectId(userId),
             postId: new ObjectId(postId),
           });
           await db.collection<CommentModel>("comments").insertOne(comment);
+          await db
+            .collection<PostModel>("posts")
+            .updateOne(
+              { _id: new ObjectId(postId) },
+              { $inc: { comments: 1 } }
+            );
 
           return "Comment was successfully created";
         } catch (error) {
@@ -111,6 +143,12 @@ export const DeleteCommentMutation = extendType({
           if (!result.value) {
             throw new Error("Comment not found");
           }
+          await db
+            .collection<PostModel>("posts")
+            .updateOne(
+              { _id: new ObjectId(postId) },
+              { $inc: { comments: -1 } }
+            );
 
           return "Comment deleted successfully";
         } catch (error) {

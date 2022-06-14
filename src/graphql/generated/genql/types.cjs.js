@@ -141,10 +141,6 @@ module.exports = {
             "unlikePost": [
                 2,
                 {
-                    "likeId": [
-                        2,
-                        "String!"
-                    ],
                     "postId": [
                         2,
                         "String!"
@@ -167,9 +163,6 @@ module.exports = {
             ],
             "image": [
                 2
-            ],
-            "likes": [
-                4
             ],
             "likesCount": [
                 7
@@ -195,6 +188,24 @@ module.exports = {
         },
         "Int": {},
         "Query": {
+            "getPostComments": [
+                0,
+                {
+                    "postId": [
+                        2,
+                        "String!"
+                    ]
+                }
+            ],
+            "getPostLikes": [
+                4,
+                {
+                    "postId": [
+                        2,
+                        "String!"
+                    ]
+                }
+            ],
             "isUsernameAvailable": [
                 9,
                 {

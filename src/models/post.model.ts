@@ -25,8 +25,8 @@ export class PostModel {
   location?: string;
   userId: ObjectId;
   image?: string;
-  likesIds: ObjectId[];
-  commentsIds: ObjectId[];
+  likes: number;
+  comments: number;
 
   constructor(partial: Partial<PostModel>) {
     Object.assign(this, partial);
@@ -35,20 +35,22 @@ export class PostModel {
   static createDocument(partial: Partial<PostModel>) {
     return new PostModel({
       ...partial,
+      likes: 0,
+      comments: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
   }
 
   static toDto(post: PostModel): Post {
-    const { _id, likesIds, commentsIds, ...rest } = post;
+    const { _id, likes, comments, ...rest } = post;
 
     return {
       ...rest,
       id: _id.toHexString(),
       userId: post.userId.toHexString(),
-      likesCount: likesIds.length,
-      commentsCount: commentsIds.length,
+      likesCount: likes,
+      commentsCount: comments,
     };
   }
 }

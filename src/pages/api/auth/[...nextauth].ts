@@ -1,10 +1,10 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import isEmail from "validator/lib/isEmail";
+import isEmail from "isemail";
 
 import { verifyPassword } from "@/lib/auth";
-import dbConnect from "@/lib/db/dbConnect";
-import User from "@/models/User";
+import { UserModel } from "@/models";
+import { connectToDatabase } from "@/lib/mongodb";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -15,27 +15,27 @@ export default NextAuth({
     Credentials({
       credentials: { email: { type: "email" }, password: { type: "password" } },
       async authorize(credentials) {
-        if (!isEmail(credentials.email)) throw new Error("Email is not valid");
-
-        try {
-          await dbConnect();
-
-          const user = await User.findOne({
-            email: credentials.email.toLowerCase(),
-          }).select("+password");
-
-          if (!user) throw new Error("No user found");
-
-          const isPasswordValid = await verifyPassword(
-            credentials.password,
-            user.password
-          );
-          if (!isPasswordValid) throw new Error("Password is not valid");
-
-          return user;
-        } catch (error) {
-          throw new Error(error);
+        if (!credentials) {
+          return null;
         }
+        if (!isEmail.validate(credentials.email))
+          throw new Error("Email is not valid");
+
+        const { db } = await connectToDatabase();
+
+        const user = await db.collection<UserModel>("users").findOne({
+          email: credentials.email.toLowerCase(),
+        });
+
+        if (!user) throw new Error("No user found");
+
+        const isPasswordValid = await verifyPassword(
+          credentials.password,
+          user.password
+        );
+        if (!isPasswordValid) throw new Error("Password is not valid");
+
+        return UserModel.toDto(user);
       },
     }),
   ],
@@ -50,7 +50,6 @@ export default NextAuth({
     },
     async jwt({ token, user }) {
       if (user) {
-        token.accessToken = user._id;
         token.user = user;
       }
       return token;

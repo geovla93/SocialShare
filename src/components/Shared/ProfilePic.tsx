@@ -9,15 +9,15 @@ type ProfilePicProps = ImageProps & {
 
 const ProfilePic: FC<ProfilePicProps> = ({ style, alt, ...props }) => {
   return (
-    <span className={cn(style)}>
+    <div className={cn("relative", style)}>
       <Image
         {...props}
         className="rounded-full"
         alt={alt}
-        width={100}
-        height={100}
+        layout="fill"
+        objectFit="cover"
       />
-    </span>
+    </div>
   );
 };
 

@@ -21,17 +21,19 @@ const Header = () => {
         {session && <SearchUsers />}
         <div className="flex items-center space-x-4">
           {session ? (
-            <Link href={`/profile/${session.user.username}`}>
-              <a className="flex items-center space-x-2 cursor-pointer text-blue-500 p-2 hover:text-gray-50 hover:bg-blue-500 rounded-full transition-colors duration-300 ease-in-out">
-                <ProfilePic
-                  style="w-8 h-8"
-                  src={session.user.image}
-                  alt={session.user.name}
-                />
-                <h2>{session.user.name}</h2>
-              </a>
+            <>
+              <Link href={`/profile/${session.user.username}`}>
+                <a className="flex items-center space-x-2 cursor-pointer text-blue-500 p-2 hover:text-gray-50 hover:bg-blue-500 rounded-full transition-colors duration-300 ease-in-out">
+                  <ProfilePic
+                    style="w-8 h-8"
+                    src={session.user.image}
+                    alt={session.user.name}
+                  />
+                  <h2>{session.user.name}</h2>
+                </a>
+              </Link>
               <ProfileDropdown />
-            </Link>
+            </>
           ) : (
             <>
               <Link href="/auth/signin">

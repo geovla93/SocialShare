@@ -39,15 +39,18 @@ const CreatePost: FC = () => {
     <Card>
       <div className="flex flex-col space-y-2 divide-y divide-gray-300">
         <div className="flex items-center space-x-4">
-          <Link href={`/profile/${session?.user.username}`}>
-            <a>
-              <ProfilePic
-                style="w-8 h-8 cursor-pointer"
-                src={session?.user.image ?? ""}
-                alt={session?.user.name ?? ""}
-              />
-            </a>
-          </Link>
+          {session && (
+            <Link href={`/profile/${session.user.username}`}>
+              <a>
+                <ProfilePic
+                  style="w-8 h-8 cursor-pointer"
+                  src={session.user.image}
+                  alt={session.user.name}
+                />
+              </a>
+            </Link>
+          )}
+
           <p
             className="flex-1 outline-none rounded-full bg-gray-200 p-2 px-4 hover:bg-gray-300 text-gray-500 cursor-pointer"
             onClick={openModal}

@@ -1,9 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { ObjectId } from "mongodb";
 
-const userPng =
-  "https://res.cloudinary.com/geovla/image/upload/v1624429463/user_default_jyyipk.png";
-
 export enum Role {
   ADMIN = "admin",
   USER = "user",
@@ -42,8 +39,7 @@ export class UserModel {
       ...partial,
       email: partial.email?.toLowerCase(),
       username: partial.username?.toLowerCase(),
-      image: partial.image ?? userPng,
-      role: partial.role ?? Role.USER,
+      role: Role.USER,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

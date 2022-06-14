@@ -1,5 +1,7 @@
 import { ObjectId } from "mongodb";
 
+import { User } from "./user.model";
+
 export type Comment = {
   id: string;
   createdAt: Date;
@@ -7,6 +9,7 @@ export type Comment = {
   text: string;
   userId: string;
   postId: string;
+  user?: User;
 };
 
 export class CommentModel {
@@ -34,7 +37,7 @@ export class CommentModel {
 
     return {
       ...rest,
-      id: comment._id.toHexString(),
+      id: _id.toHexString(),
       userId: userId.toHexString(),
       postId: postId.toHexString(),
     };

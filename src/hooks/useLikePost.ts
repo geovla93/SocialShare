@@ -6,8 +6,9 @@ const useLikePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation(likePost, {
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries("posts");
+      queryClient.invalidateQueries(["likes", variables.postId]);
     },
   });
 };

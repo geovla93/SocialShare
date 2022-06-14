@@ -32,11 +32,13 @@ const CommentInputField = forwardRef<HTMLInputElement, CommentInputFieldProps>(
 
     return (
       <div className="flex space-x-4 items-center px-3">
-        <ProfilePic
-          style="w-8 h-8 cursor-pointer"
-          src={session?.user.image ?? ""}
-          alt={session?.user.name ?? ""}
-        />
+        {session && (
+          <ProfilePic
+            style="w-8 h-8 cursor-pointer"
+            src={session.user.image}
+            alt={session.user.name}
+          />
+        )}
         <form
           onSubmit={handleSubmit}
           className="flex items-center flex-1 p-2 px-3 border rounded-full"
