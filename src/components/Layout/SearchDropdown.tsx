@@ -1,10 +1,15 @@
+import { FC } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import Link from "next/link";
-import { FC } from "react";
 
 import ProfilePic from "../Shared/ProfilePic";
+import { User } from "@/models";
 
-const SearchDropdown: FC<{ users: Array<any> }> = ({ users }) => {
+type SearchDropdownProps = {
+  users: Pick<User, "id" | "image" | "name" | "username">[];
+};
+
+const SearchDropdown: FC<SearchDropdownProps> = ({ users }) => {
   return (
     <Menu as="div" className="text-left">
       <Transition
@@ -23,7 +28,7 @@ const SearchDropdown: FC<{ users: Array<any> }> = ({ users }) => {
           {users?.length > 0 && (
             <Menu.Item as="div" className="w-full">
               {users.map((user) => (
-                <Link key={user._id} href={`/profile/${user.username}`}>
+                <Link key={user.id} href={`/profile/${user.username}`}>
                   <a className="flex items-center space-x-4 cursor-pointer p-2 rounded hover:bg-blue-500 transition-colors duration-300 ease-in-out">
                     <ProfilePic
                       style="w-10 h-10"

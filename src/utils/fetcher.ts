@@ -29,10 +29,10 @@ export const getUsers = async (
   name: string
 ): Promise<Pick<User, "id" | "image" | "name" | "username">[] | null> => {
   if (name.length === 0) return null;
-  const users = await client.query({
+  const { users } = await client.query({
     users: [{ name }, { id: true, name: true, username: true, image: true }],
   });
-  if (!Array.isArray(users)) {
+  if (typeof users === "undefined") {
     throw new Error("Users not returned");
   }
 

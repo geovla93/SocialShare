@@ -2,16 +2,22 @@ import { useState, useEffect, useCallback, FC } from "react";
 import { SearchIcon } from "@heroicons/react/outline";
 import { useRouter } from "next/router";
 
-import { getUsers } from "@/utils/fetcher";
 import SearchDropdown from "./SearchDropdown";
+import { getUsers } from "@/utils/fetcher";
+import { User } from "@/models";
 
 const SearchUsers: FC = () => {
   const [text, setText] = useState("");
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<
+    Pick<User, "id" | "image" | "name" | "username">[]
+  >([]);
   const router = useRouter();
 
   const fetchUsers = useCallback(async () => {
     const users = await getUsers(text);
+    if (users === null) {
+      return;
+    }
     setUsers(users);
   }, [text]);
 
