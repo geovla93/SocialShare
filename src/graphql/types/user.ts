@@ -59,7 +59,7 @@ export const SignUpMutation = extendType({
 
           const hashedPassword = await hashPassword(password);
 
-          const newUser = new UserModel({
+          const newUser = UserModel.createDocument({
             name,
             username,
             email,

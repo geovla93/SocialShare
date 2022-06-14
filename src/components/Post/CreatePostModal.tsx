@@ -47,7 +47,7 @@ const CreatePostModal: FC<CreatePostModalProps> = ({
     control,
     reset,
     handleSubmit,
-    formState: { isSubmitSuccessful },
+    formState: { isSubmitSuccessful, isSubmitted },
   } = useForm<{ text: string; location: string }>({
     defaultValues: { text: "", location: "" },
   });
@@ -55,11 +55,11 @@ const CreatePostModal: FC<CreatePostModalProps> = ({
   const text = useWatch({ control, name: "text" });
 
   useEffect(() => {
-    if (isSubmitSuccessful) {
+    if (isSubmitted && isSubmitSuccessful) {
       reset({ text: "", location: "" });
       closeModal();
     }
-  }, [closeModal, isSubmitSuccessful, reset]);
+  }, [closeModal, isSubmitSuccessful, isSubmitted, reset]);
 
   const handleDeleteMedia = () => {
     setMedia(null);
